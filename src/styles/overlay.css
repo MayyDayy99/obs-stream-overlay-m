@@ -22,12 +22,22 @@
   transition: background 0.6s ease, color 0.6s ease;
 }
 
-/* Ambient background orbs */
+/* Ambient background orbs & noise */
 .overlay-bg {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+}
+
+.overlay-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .overlay-orb {
@@ -66,6 +76,26 @@
   right: 14vw;
   top: -10vw;
   animation: drift1 38s ease-in-out infinite reverse;
+}
+
+.overlay-orb.d {
+  width: 38vw;
+  height: 38vw;
+  background: var(--glow);
+  opacity: 0.12;
+  left: 20vw;
+  bottom: -10vw;
+  animation: drift3 40s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.overlay-orb.e {
+  width: 50vw;
+  height: 50vw;
+  background: var(--accent);
+  opacity: 0.05;
+  right: -5vw;
+  top: 15vw;
+  animation: drift4 45s cubic-bezier(0.4, 0, 0.2, 1) infinite reverse;
 }
 
 .overlay-vignette {
@@ -216,6 +246,51 @@
 
 .overlay-pulse .ring:nth-child(2) { animation-delay: 1.2s; }
 
+/* Hologram Indicator */
+.overlay-hologram {
+  position: relative;
+  width: clamp(64px, 8vw, 100px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  perspective: 800px;
+}
+
+.overlay-hologram .holo-core {
+  width: 16%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 20px var(--accent);
+  animation: holo-pulse 2s ease-in-out infinite;
+}
+
+.overlay-hologram .holo-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--accent);
+  border-bottom-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  animation: holo-spin 3s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}
+
+.overlay-hologram .holo-ring:nth-child(2) {
+  inset: 12%;
+  border-top-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  border-bottom-color: var(--accent);
+  animation: holo-spin 4s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite reverse;
+}
+
+/* Morph Indicator */
+.overlay-morph {
+  width: clamp(50px, 6vw, 80px);
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, var(--accent), var(--glow));
+  animation: morphing 4s ease-in-out infinite, spin 6s linear infinite;
+  box-shadow: 0 0 30px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
 /* Footer */
 .overlay-footer {
   position: absolute;
@@ -281,6 +356,18 @@
   50% { transform: translate(-5vw, -3vw) scale(1.1); }
 }
 
+@keyframes drift3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(4vw, -6vw) scale(1.15); }
+  66% { transform: translate(-3vw, 4vw) scale(0.9); }
+}
+
+@keyframes drift4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-6vw, 2vw) scale(0.85); }
+  66% { transform: translate(5vw, 5vw) scale(1.1); }
+}
+
 @keyframes dotwave {
   0%, 65%, 100% { transform: translateY(0) scale(0.68); opacity: 0.32; }
   32% { transform: translateY(-0.34em) scale(1); opacity: 1; }
@@ -299,6 +386,28 @@
 @keyframes livepulse {
   0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent); }
   70%, 100% { box-shadow: 0 0 0 0.9em transparent; }
+}
+
+@keyframes holo-spin {
+  0% { transform: rotateX(60deg) rotateY(0deg) rotateZ(0deg); }
+  100% { transform: rotateX(60deg) rotateY(360deg) rotateZ(360deg); }
+}
+
+@keyframes holo-pulse {
+  0%, 100% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes morphing {
+  0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+  34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+  67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+  100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {

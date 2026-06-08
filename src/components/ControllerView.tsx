@@ -21,7 +21,7 @@ export function ControllerView() {
   const [customMessage, setCustomMessage] = useSharedState<string>('obs-custom-message', '')
   const [theme, setTheme] = useSharedState<ThemeType>('obs-theme', 'kek')
   const [accentColor, setAccentColor] = useSharedState<string>('obs-accent-color', '#06DCDC')
-  const [indicator, setIndicator] = useSharedState<IndicatorType>('obs-indicator', 'dots')
+  const [indicator, setIndicator] = useSharedState<IndicatorType>('obs-indicator', 'hologram')
   const [timerMinutes, setTimerMinutes] = useSharedState<number>('obs-timer-minutes', 5)
   const [isTimerActive, setIsTimerActive] = useSharedState<boolean>('obs-timer-active', false)
   const [showLive, setShowLive] = useSharedState<boolean>('obs-show-live', true)

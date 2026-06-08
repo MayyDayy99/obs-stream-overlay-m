@@ -74,6 +74,8 @@ const indicatorOptions: Array<{ id: IndicatorType; label: string }> = [
   { id: 'dots', label: 'Pontok' },
   { id: 'bar', label: 'Sáv' },
   { id: 'pulse', label: 'Pulzus' },
+  { id: 'hologram', label: 'Hologram' },
+  { id: 'morph', label: 'Organikus' },
 ]
 
 export function ControlPanel({

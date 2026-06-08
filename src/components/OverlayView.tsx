@@ -9,7 +9,7 @@ export function OverlayView() {
   const [customMessage] = useSharedState<string>('obs-custom-message', '')
   const [theme] = useSharedState<ThemeType>('obs-theme', 'kek')
   const [accentColor] = useSharedState<string>('obs-accent-color', '#06DCDC')
-  const [indicator] = useSharedState<IndicatorType>('obs-indicator', 'dots')
+  const [indicator] = useSharedState<IndicatorType>('obs-indicator', 'hologram')
   const [timerMinutes] = useSharedState<number>('obs-timer-minutes', 5)
   const [isTimerActive] = useSharedState<boolean>('obs-timer-active', false)
   const [showLive] = useSharedState<boolean>('obs-show-live', true)

@@ -4,7 +4,7 @@ import oeLogoColor from '@/assets/images/oe-logo-color.svg'
 
 export type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending'
 export type ThemeType = 'kek' | 'sotet' | 'vilagos'
-export type IndicatorType = 'dots' | 'bar' | 'pulse'
+export type IndicatorType = 'dots' | 'bar' | 'pulse' | 'hologram' | 'morph'
 
 interface StreamOverlayProps {
   scene: SceneType
@@ -62,6 +62,17 @@ function Indicator({ kind }: { kind: IndicatorType }) {
       </div>
     </div>
   )
+  if (kind === 'hologram') return (
+    <div className="overlay-indicator">
+      <div className="overlay-hologram">
+        <span className="holo-ring" />
+        <span className="holo-ring" />
+        <span className="holo-core" />
+      </div>
+    </div>
+  )
+  if (kind === 'morph') return <div className="overlay-indicator"><div className="overlay-morph" /></div>
+
   return (
     <div className="overlay-indicator">
       <div className="overlay-dots"><span /><span /><span /></div>
@@ -138,9 +149,12 @@ export function StreamOverlay({
   return (
     <div className="overlay-scene" data-theme={theme} style={styleVars as React.CSSProperties}>
       <div className="overlay-bg">
+        <div className="overlay-noise" />
         <div className="overlay-orb a" />
         <div className="overlay-orb b" />
         <div className="overlay-orb c" />
+        <div className="overlay-orb d" />
+        <div className="overlay-orb e" />
       </div>
       <div className="overlay-vignette" />
 
