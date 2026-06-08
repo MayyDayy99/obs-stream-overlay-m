@@ -181,7 +181,13 @@ export function StreamOverlay({
 
       {!isLive && (
         <div className="overlay-center">
-          <img className="overlay-logo" src={logoSrc} alt="Óbudai Egyetem" />
+          <div className="overlay-logo-container">
+            <img 
+              src={logoUrl()} 
+              alt="Logo" 
+              className={`overlay-logo logo-anim-${logoAnim}`} 
+            />
+          </div>
           <Headline text={headlineText} />
           {isTimerActive
             ? <Countdown minutes={timerMinutes} key={timerMinutes} />
