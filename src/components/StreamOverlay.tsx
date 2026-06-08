@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import oeLogo from '@/assets/images/oe-logo.svg'
 import oeLogoColor from '@/assets/images/oe-logo-color.svg'
+import { FloatingOE } from './FloatingOE'
 
 export type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending'
 export type ThemeType = 'kek' | 'sotet' | 'vilagos'
@@ -150,6 +151,7 @@ export function StreamOverlay({
   return (
     <div className={`overlay-scene ${isLive ? 'is-live' : ''}`} data-theme={theme} style={styleVars as React.CSSProperties}>
       <div className="overlay-bg" style={{ opacity: isLive ? 0.35 : 1 }}>
+        <FloatingOE />
         <div className="overlay-noise" />
         <div className="overlay-orb a" />
         <div className="overlay-orb b" />
