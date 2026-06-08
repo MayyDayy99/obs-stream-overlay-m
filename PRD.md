@@ -15,9 +15,16 @@ This is a control panel with several preset overlay states that need to persist 
 ### Scene Management
 - **Functionality**: Toggle between different stream states (Starting Soon, Live, Break, Coffee Break, Ending)
 - **Purpose**: Quick access to common stream overlays without fumbling through OBS scenes
-- **Trigger**: Large button clicks from the control panel
-- **Progression**: Click scene button → Immediate full-screen overlay transition → Background animation loops → Return to Live when ready
-- **Success criteria**: Overlay changes within 100ms, animations loop smoothly, previous state is remembered
+- **Trigger**: Large button clicks from the control panel OR keyboard shortcuts (1-5 keys)
+- **Progression**: Click scene button / Press hotkey → Immediate full-screen overlay transition → Background animation loops → Return to Live when ready
+- **Success criteria**: Overlay changes within 100ms, animations loop smoothly, previous state is remembered, hotkeys work from anywhere in the control panel
+
+### Keyboard Shortcuts
+- **Functionality**: Global keyboard shortcuts for instant scene switching without needing to click
+- **Purpose**: Enables streamers to change scenes rapidly during live broadcasts without taking focus away from content
+- **Trigger**: Number keys 1-5 for scenes, T for timer, Ctrl+Z for undo, ? for help
+- **Progression**: Press hotkey → Visual feedback via toast → Scene changes instantly → Confirmation shown briefly
+- **Success criteria**: Hotkeys work when not focused on input fields, ? key opens comprehensive hotkey reference dialog, all shortcuts are discoverable
 
 ### Custom Message Display
 - **Functionality**: Add custom text overlays for announcements
@@ -36,17 +43,19 @@ This is a control panel with several preset overlay states that need to persist 
 ### Timer Display
 - **Functionality**: Countdown timer for breaks
 - **Purpose**: Sets viewer expectations for return time
-- **Trigger**: Set duration and start countdown
-- **Progression**: Enter minutes → Start timer → Large on-screen countdown → Optional alert at completion
-- **Success criteria**: Accurate to the second, visible against all backgrounds, persists if page refreshes
+- **Trigger**: Set duration and start countdown OR press T hotkey to toggle
+- **Progression**: Enter minutes → Start timer / Press T → Large on-screen countdown → Optional alert at completion
+- **Success criteria**: Accurate to the second, visible against all backgrounds, persists if page refreshes, hotkey toggles timer state
 
 ## Edge Case Handling
 
-- **Accidental Scene Switch**: Quick undo button returns to previous scene within 3 seconds
+- **Accidental Scene Switch**: Quick undo button returns to previous scene within 3 seconds, also accessible via Ctrl+Z hotkey
 - **Browser Source Refresh**: State persists via KV store - scene and settings restore automatically
 - **Multiple Instances**: Only control panel needs interaction, actual overlay window is view-only
-- **Long Break Extensions**: Timer can be extended mid-countdown without resetting
+- **Long Break Extensions**: Timer can be extended mid-countdown without resetting, toggled via T hotkey
 - **Custom Message Overflow**: Text auto-scales to fit screen, warns if too long
+- **Hotkey Conflicts**: Hotkeys disabled when typing in input fields or textareas to prevent accidental scene switches
+- **Hotkey Discovery**: ? key opens comprehensive reference dialog showing all available shortcuts
 
 ## Design Direction
 
@@ -101,7 +110,7 @@ Animations should feel mechanical and precise - like broadcast equipment switchi
   - Inputs: Focus state has cyan border glow matching broadcast aesthetic
   - Timer: Pulsing animation when under 1 minute remaining
 - **Icon Selection**: 
-  - Play (starting soon), Broadcast (live), Coffee (coffee break), ForkKnife (lunch break), HandWaving (ending), Clock (timer), TextT (custom message)
+  - Play (starting soon), Broadcast (live), Coffee (coffee break), ForkKnife (lunch break), HandWaving (ending), Clock (timer), TextT (custom message), Keyboard (hotkeys), ArrowCounterClockwise (undo)
 - **Spacing**: 
   - Control panel uses generous padding (p-8) with gap-6 between sections
   - Scene buttons in a 2x3 grid with gap-4

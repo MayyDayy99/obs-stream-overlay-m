@@ -13,7 +13,8 @@ import {
   HandWaving,
   Clock,
   TextT,
-  ArrowCounterClockwise
+  ArrowCounterClockwise,
+  Keyboard
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 
@@ -33,6 +34,7 @@ interface ControlPanelProps {
   onTimerToggle: () => void
   previousScene: SceneType | null
   onUndo: () => void
+  onShowHotkeys: () => void
 }
 
 const sceneButtons: Array<{
@@ -40,12 +42,13 @@ const sceneButtons: Array<{
   label: string
   icon: any
   color: string
+  hotkey: string
 }> = [
-  { scene: 'live', label: 'ÉLŐ', icon: Broadcast, color: 'primary' },
-  { scene: 'starting-soon', label: 'HAMAROSAN', icon: Play, color: 'accent' },
-  { scene: 'break', label: 'EBÉDSZÜNET', icon: ForkKnife, color: 'accent' },
-  { scene: 'coffee-break', label: 'KÁVÉSZÜNET', icon: Coffee, color: 'accent' },
-  { scene: 'ending', label: 'VÉGE', icon: HandWaving, color: 'accent' },
+  { scene: 'live', label: 'ÉLŐ', icon: Broadcast, color: 'primary', hotkey: '1' },
+  { scene: 'starting-soon', label: 'HAMAROSAN', icon: Play, color: 'accent', hotkey: '2' },
+  { scene: 'break', label: 'EBÉDSZÜNET', icon: ForkKnife, color: 'accent', hotkey: '3' },
+  { scene: 'coffee-break', label: 'KÁVÉSZÜNET', icon: Coffee, color: 'accent', hotkey: '4' },
+  { scene: 'ending', label: 'VÉGE', icon: HandWaving, color: 'accent', hotkey: '5' },
 ]
 
 export function ControlPanel({
@@ -60,7 +63,8 @@ export function ControlPanel({
   isTimerActive,
   onTimerToggle,
   previousScene,
-  onUndo
+  onUndo,
+  onShowHotkeys
 }: ControlPanelProps) {
   return (
     <div className="flex min-h-screen flex-col gap-6 p-8">
@@ -71,6 +75,15 @@ export function ControlPanel({
         </div>
         
         <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onShowHotkeys}
+            className="gap-2"
+          >
+            <Keyboard size={18} />
+            Gyorsbillentyűk
+          </Button>
           {previousScene && previousScene !== currentScene && (
             <Button
               variant="outline"
@@ -107,11 +120,17 @@ export function ControlPanel({
                   <Button
                     onClick={() => onSceneChange(btn.scene)}
                     className={cn(
-                      "h-32 w-full flex-col gap-3 text-lg font-bold transition-all",
+                      "relative h-32 w-full flex-col gap-3 text-lg font-bold transition-all",
                       isActive && "ring-4 ring-ring shadow-[0_0_20px_rgba(116,195,251,0.5)]"
                     )}
                     variant={isActive ? 'default' : 'outline'}
                   >
+                    <Badge 
+                      variant="secondary" 
+                      className="absolute top-2 right-2 font-mono text-xs font-bold"
+                    >
+                      {btn.hotkey}
+                    </Badge>
                     <Icon size={40} weight="bold" />
                     {btn.label}
                   </Button>
