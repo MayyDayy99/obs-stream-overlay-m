@@ -20,7 +20,7 @@ import {
   Warning
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
-import type { SceneType, ThemeType, IndicatorType } from '@/components/StreamOverlay'
+import type { SceneType, ThemeType, IndicatorType, FacultyType, LogoAnimType } from '@/components/StreamOverlay'
 
 interface ControlPanelProps {
   currentScene: SceneType
@@ -44,7 +44,11 @@ interface ControlPanelProps {
   showClock: boolean
   onShowClockChange: (v: boolean) => void
   subtitle: string
-  onSubtitleChange: (v: string) => void
+  onSubtitleChange: (subtitle: string) => void
+  faculty: FacultyType
+  onFacultyChange: (faculty: FacultyType) => void
+  logoAnim: LogoAnimType
+  onLogoAnimChange: (anim: LogoAnimType) => void
   previousScene: SceneType | null
   onUndo: () => void
   onShowHotkeys: () => void
@@ -80,6 +84,25 @@ const indicatorOptions: Array<{ id: IndicatorType; label: string }> = [
   { id: 'morph', label: 'Organikus' },
 ]
 
+const logoAnimOptions: Array<{ id: LogoAnimType; label: string }> = [
+  { id: 'breathe', label: 'Lélegzés (Letisztult)' },
+  { id: 'spin3d', label: '3D Érme (Letisztult)' },
+  { id: 'bounce', label: 'Pattogás (Vicces)' },
+  { id: 'glitch', label: 'Glitch (Cyberpunk)' },
+  { id: 'swing', label: 'Inga (Játékos)' },
+]
+
+const facultyOptions: Array<{ id: FacultyType; label: string }> = [
+  { id: 'oe', label: 'Óbudai Egyetem (Fő)' },
+  { id: 'amk', label: 'AMK - Alba Regia Műszaki Kar' },
+  { id: 'bgk', label: 'BGK - Bánki Donát Gépész Kar' },
+  { id: 'kgk', label: 'KGK - Keleti Károly Gazdasági Kar' },
+  { id: 'kvk', label: 'KVK - Kandó Kálmán Villamos Kar' },
+  { id: 'nik', label: 'NIK - Neumann János Informatikai Kar' },
+  { id: 'rkk', label: 'RKK - Rejtő Sándor Könnyűipari Kar' },
+  { id: 'ybl', label: 'YBL - Ybl Miklós Építéstudományi Kar' },
+]
+
 export function ControlPanel({
   currentScene,
   onSceneChange,
@@ -103,6 +126,10 @@ export function ControlPanel({
   onShowClockChange,
   subtitle,
   onSubtitleChange,
+  faculty,
+  onFacultyChange,
+  logoAnim,
+  onLogoAnimChange,
   previousScene,
   onUndo,
   onShowHotkeys
@@ -304,6 +331,39 @@ export function ControlPanel({
                 ))}
               </div>
             </div>
+            
+            {/* Faculty & Logo Anim */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2 pt-4 border-t border-border">
+              <div>
+                <Label>Aktív Kar / Intézmény</Label>
+                <div className="grid grid-cols-1 gap-2 mt-2">
+                  <select 
+                    className="flex h-12 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    value={faculty}
+                    onChange={(e) => onFacultyChange(e.target.value as FacultyType)}
+                  >
+                    {facultyOptions.map(opt => (
+                      <option key={opt.id} value={opt.id}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <Label>Logó Animáció</Label>
+                <div className="grid grid-cols-1 gap-2 mt-2">
+                  <select 
+                    className="flex h-12 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    value={logoAnim}
+                    onChange={(e) => onLogoAnimChange(e.target.value as LogoAnimType)}
+                  >
+                    {logoAnimOptions.map(opt => (
+                      <option key={opt.id} value={opt.id}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
           </div>
         </Card>
 

@@ -28,6 +28,8 @@ export function ControllerView() {
   const [liveLabel, setLiveLabel] = useSharedState<string>('obs-live-label', 'Élő közvetítés')
   const [showClock, setShowClock] = useSharedState<boolean>('obs-show-clock', true)
   const [subtitle, setSubtitle] = useSharedState<string>('obs-subtitle', '')
+  const [faculty, setFaculty] = useSharedState<any>('obs-faculty', 'oe')
+  const [logoAnim, setLogoAnim] = useSharedState<any>('obs-logo-anim', 'breathe')
   const [isHotkeyDialogOpen, setIsHotkeyDialogOpen] = useState(false)
 
   const handleSceneChange = (newScene: SceneType) => {
@@ -90,6 +92,10 @@ export function ControllerView() {
         onShowClockChange={setShowClock}
         subtitle={subtitle || ''}
         onSubtitleChange={setSubtitle}
+        faculty={faculty}
+        onFacultyChange={setFaculty}
+        logoAnim={logoAnim}
+        onLogoAnimChange={setLogoAnim}
         previousScene={previousScene}
         onUndo={handleUndo}
         onShowHotkeys={() => setIsHotkeyDialogOpen(true)}

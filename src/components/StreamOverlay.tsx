@@ -6,6 +6,8 @@ import { FloatingOE } from './FloatingOE'
 export type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending' | 'technical-issue'
 export type ThemeType = 'kek' | 'sotet' | 'vilagos'
 export type IndicatorType = 'dots' | 'bar' | 'pulse' | 'hologram' | 'morph'
+export type FacultyType = 'oe' | 'amk' | 'bgk' | 'kgk' | 'kvk' | 'nik' | 'rkk' | 'ybl'
+export type LogoAnimType = 'breathe' | 'spin3d' | 'bounce' | 'glitch' | 'swing'
 
 interface StreamOverlayProps {
   scene: SceneType
@@ -19,6 +21,8 @@ interface StreamOverlayProps {
   subtitle: string
   timerSeconds: number
   isTimerActive: boolean
+  faculty: FacultyType
+  logoAnim: LogoAnimType
 }
 
 const sceneMessages: Record<SceneType, string> = {
@@ -137,15 +141,26 @@ export function StreamOverlay({
   subtitle,
   timerSeconds,
   isTimerActive,
+  faculty,
+  logoAnim,
 }: StreamOverlayProps) {
   const isLive = scene === 'live'
   const themeVars = THEMES[theme] || THEMES.kek
+  
+  const logoUrl = () => {
+    if (faculty === 'oe') {
+      return theme === 'vilagos' ? oeLogoColor : oeLogo
+    }
+    const themeSuffix = theme === 'vilagos' ? '' : '_in'
+    return `/assets/images/faculties/${faculty.toUpperCase()}${themeSuffix}.png`
+  }
+
   const styleVars: Record<string, string> = { 
     ...themeVars, 
     '--accent': accentColor,
     background: isLive ? 'transparent' : 'var(--bg)'
   }
-  const logoSrc = theme === 'vilagos' ? oeLogoColor : oeLogo
+  
   const headlineText = customMessage || sceneMessages[scene] || ''
   const subtitleText = subtitle || sceneSubtitles[scene] || ''
   const timerMinutes = Math.ceil(timerSeconds / 60)

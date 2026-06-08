@@ -16,6 +16,8 @@ export function OverlayView() {
   const [liveLabel] = useSharedState<string>('obs-live-label', 'Élő közvetítés')
   const [showClock] = useSharedState<boolean>('obs-show-clock', true)
   const [subtitle] = useSharedState<string>('obs-subtitle', '')
+  const [faculty] = useSharedState<any>('obs-faculty', 'oe')
+  const [logoAnim] = useSharedState<any>('obs-logo-anim', 'breathe')
 
   return (
     <div className="relative w-full h-screen">
@@ -31,6 +33,8 @@ export function OverlayView() {
         subtitle={subtitle || ''}
         timerSeconds={(timerMinutes || 5) * 60}
         isTimerActive={isTimerActive || false}
+        faculty={faculty || 'oe'}
+        logoAnim={logoAnim || 'breathe'}
       />
 
       <Link 
