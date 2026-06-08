@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hamarosan kezdünk — Óbudai Egyetem</title>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<rect width="100" height="100" fill="#01298B"/>
+<rect x="30" y="34" width="40" height="32" rx="6" fill="#fff"/>
+<circle cx="44" cy="50" r="7" fill="none" stroke="#01298B" stroke-width="3"/>
+<rect x="40" y="38" width="6" height="3" rx="1.5" fill="#06DCDC"/>
+<path d="M56 47h7v6h-7" fill="none" stroke="#01298B" stroke-width="3"/>
+<circle cx="42" cy="76" r="2.6" fill="#06DCDC"/>
+<circle cx="50" cy="76" r="2.6" fill="#06DCDC"/>
+<circle cx="58" cy="76" r="2.6" fill="#06DCDC"/>
+</svg>
+</template>
+<style>
+  @font-face{font-family:'Open Sans';src:url('fonts/OpenSans-Light.ttf') format('truetype');font-weight:300;font-style:normal;font-display:swap;}
+  @font-face{font-family:'Open Sans';src:url('fonts/OpenSans-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap;}
+  @font-face{font-family:'Open Sans';src:url('fonts/OpenSans-Semibold.ttf') format('truetype');font-weight:600;font-style:normal;font-display:swap;}
+  @font-face{font-family:'Open Sans';src:url('fonts/OpenSans-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap;}
+  @font-face{font-family:'Open Sans';src:url('fonts/OpenSans-ExtraBold.ttf') format('truetype');font-weight:800;font-style:normal;font-display:swap;}
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;width:100%;overflow:hidden;background:#01298B;}
+  body{font-family:'Open Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+
+  #root{height:100%;width:100%;}
+
+  .scene{
+    position:fixed;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:var(--bg);
+    color:var(--fg);
+    overflow:hidden;
+    transition:background .6s ease,color .6s ease;
+  }
+
+  /* ambient background ----------------------------------------------- */
+  .bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+  .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;will-change:transform;}
+  .orb.a{width:46vw;height:46vw;background:var(--accent);opacity:.12;left:-10vw;top:-12vw;animation:drift1 26s ease-in-out infinite;}
+  .orb.b{width:40vw;height:40vw;background:var(--glow);opacity:.16;right:-12vw;bottom:-14vw;animation:drift2 32s ease-in-out infinite;}
+  .orb.c{width:30vw;height:30vw;background:var(--accent);opacity:.07;right:14vw;top:-10vw;animation:drift1 38s ease-in-out infinite reverse;}
+  .vignette{position:absolute;inset:0;background:radial-gradient(120% 100% at 50% 42%,transparent 38%,rgba(0,0,0,var(--vig)) 100%);pointer-events:none;}
+
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(6vw,4vw) scale(1.08)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-5vw,-3vw) scale(1.1)}}
+
+  /* center stack ----------------------------------------------------- */
+  .center{
+    position:relative;z-index:2;
+    display:flex;flex-direction:column;align-items:center;
+    gap:clamp(22px,3.4vh,46px);
+    padding:0 6vw;
+    text-align:center;
+  }
+  .logo{
+    height:clamp(104px,17.5vh,196px);width:auto;
+    filter:drop-shadow(0 10px 30px rgba(0,0,0,.18));
+    animation:appear .9s cubic-bezier(.2,.7,.2,1) both, breathe 7s ease-in-out 1.2s infinite;
+  }
+
+  .headline{
+    font-weight:800;
+    font-size:clamp(38px,6.6vw,108px);
+    line-height:.98;
+    letter-spacing:-.015em;
+    text-wrap:balance;
+    animation:appear .9s cubic-bezier(.2,.7,.2,1) .12s both;
+  }
+  .headline .accentword{color:var(--accent);}
+
+  .subtitle{
+    font-weight:400;
+    font-size:clamp(15px,1.7vw,27px);
+    color:var(--muted);
+    letter-spacing:.005em;
+    max-width:40ch;text-wrap:balance;
+    animation:appear .9s cubic-bezier(.2,.7,.2,1) .22s both;
+  }
+
+  /* countdown -------------------------------------------------------- */
+  .countdown{
+    display:flex;align-items:baseline;gap:.12em;
+    font-weight:700;font-variant-numeric:tabular-nums;
+    font-size:clamp(44px,8vw,128px);
+    line-height:1;letter-spacing:.01em;color:var(--fg);
+    animation:appear .9s cubic-bezier(.2,.7,.2,1) .2s both;
+  }
+  .countdown .col{color:var(--accent);opacity:.85;transform:translateY(-.04em);}
+  .countdown.done{font-size:clamp(30px,4.4vw,64px);color:var(--accent);font-weight:800;letter-spacing:-.01em;}
+
+  /* indicators ------------------------------------------------------- */
+  .indicator{font-size:clamp(20px,2.7vw,38px);animation:appear .9s ease .3s both;}
+
+  .dots{display:flex;gap:.62em;}
+  .dots span{width:.62em;height:.62em;border-radius:50%;background:var(--accent);display:block;animation:dotwave 1.4s ease-in-out infinite;}
+  .dots span:nth-child(2){animation-delay:.18s;}
+  .dots span:nth-child(3){animation-delay:.36s;}
+
+  .bar{position:relative;width:clamp(220px,30vw,440px);height:5px;border-radius:99px;background:var(--line);overflow:hidden;}
+  .bar::before{content:"";position:absolute;top:0;bottom:0;left:0;width:34%;border-radius:99px;background:var(--accent);animation:slide 2.3s cubic-bezier(.6,.05,.4,.95) infinite;}
+
+  .pulse{position:relative;width:clamp(58px,7vw,92px);aspect-ratio:1;display:grid;place-items:center;}
+  .pulse .core{width:24%;aspect-ratio:1;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 var(--accent);}
+  .pulse .ring{position:absolute;inset:0;border-radius:50%;border:2.5px solid var(--accent);animation:ripple 2.4s cubic-bezier(.2,.6,.3,1) infinite;}
+  .pulse .ring:nth-child(2){animation-delay:1.2s;}
+
+  /* footer ----------------------------------------------------------- */
+  .footer{
+    position:absolute;left:0;right:0;bottom:0;z-index:2;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:clamp(18px,3vh,40px) clamp(28px,4.4vw,72px);
+    font-size:clamp(12px,1.05vw,17px);
+    color:var(--muted);
+    animation:appear .9s ease .4s both;
+  }
+  .live{display:flex;align-items:center;gap:.7em;font-weight:600;letter-spacing:.14em;text-transform:uppercase;}
+  .live .ld{width:.7em;height:.7em;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 var(--accent);animation:livepulse 1.8s ease-out infinite;}
+  .clock{font-weight:600;letter-spacing:.04em;font-variant-numeric:tabular-nums;}
+  .footer .spacer{flex:1;}
+
+  /* keyframes -------------------------------------------------------- */
+  @keyframes appear{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.018)}}
+  @keyframes dotwave{0%,65%,100%{transform:translateY(0) scale(.68);opacity:.32}32%{transform:translateY(-.34em) scale(1);opacity:1}}
+  @keyframes slide{0%{transform:translateX(-120%)}100%{transform:translateX(360%)}}
+  @keyframes ripple{0%{transform:scale(.32);opacity:.55}100%{transform:scale(1);opacity:0}}
+  @keyframes livepulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent)}70%,100%{box-shadow:0 0 0 .9em transparent}}
+
+  @media (prefers-reduced-motion: reduce){
+    .orb,.logo,.dots span,.bar::before,.pulse .ring,.live .ld{animation:none!important;}
+    .center>*,.footer{animation:appear .6s ease both!important;}
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "headline": "Hamarosan kezdünk",
+  "subtitle": "A közvetítés hamarosan elindul — köszönjük a türelmet.",
+  "theme": "kek",
+  "accent": "#ffffff",
+  "indicator": "dots",
+  "showLive": true,
+  "liveLabel": "Élő közvetítés",
+  "showClock": true,
+  "countdown": false,
+  "minutes": 10
+}/*EDITMODE-END*/;
+
+const THEMES = {
+  kek:     { "--bg":"#01298B", "--glow":"#1D4FD0", "--fg":"#ffffff", "--muted":"rgba(255,255,255,.66)", "--line":"rgba(255,255,255,.16)", "--vig":".30", logo:"assets/oe-logo.svg" },
+  sotet:   { "--bg":"#070B18", "--glow":"#16306e", "--fg":"#ffffff", "--muted":"rgba(255,255,255,.60)", "--line":"rgba(255,255,255,.12)", "--vig":".55", logo:"assets/oe-logo.svg" },
+  vilagos: { "--bg":"#EEF1F8", "--glow":"#9fb6ee", "--fg":"#01298B", "--muted":"rgba(1,41,139,.60)", "--line":"rgba(1,41,139,.16)", "--vig":".05", logo:"assets/oe-logo-color.svg" },
+};
+
+function pad(n){ return String(n).padStart(2,"0"); }
+
+function Indicator({ kind }){
+  if(kind==="bar")  return <div className="indicator"><div className="bar" /></div>;
+  if(kind==="pulse")return <div className="indicator"><div className="pulse"><span className="ring"/><span className="ring"/><span className="core"/></div></div>;
+  return <div className="indicator dots-wrap"><div className="dots"><span/><span/><span/></div></div>;
+}
+
+function Countdown({ minutes }){
+  const [left, setLeft] = useState(minutes*60);
+  useEffect(()=>{
+    const KEY = "oe_soon_end";
+    let end = parseInt(localStorage.getItem(KEY)||"0",10);
+    const storedMin = parseInt(localStorage.getItem("oe_soon_min")||"-1",10);
+    const now = Date.now();
+    if(!end || end < now || storedMin !== minutes){
+      end = now + minutes*60*1000;
+      localStorage.setItem(KEY, String(end));
+      localStorage.setItem("oe_soon_min", String(minutes));
+    }
+    const tick = ()=> setLeft(Math.max(0, Math.round((end - Date.now())/1000)));
+    tick();
+    const id = setInterval(tick, 250);
+    return ()=> clearInterval(id);
+  }, [minutes]);
+
+  if(left<=0) return <div className="countdown done">Mindjárt kezdünk!</div>;
+  const m = Math.floor(left/60), s = left%60;
+  return (
+    <div className="countdown">
+      <span>{pad(m)}</span><span className="col">:</span><span>{pad(s)}</span>
+    </div>
+  );
+}
+
+function Clock(){
+  const [t,setT]=useState("");
+  useEffect(()=>{
+    const f=()=>{const d=new Date();setT(pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds()));};
+    f();const id=setInterval(f,1000);return ()=>clearInterval(id);
+  },[]);
+  return <span className="clock">{t}</span>;
+}
+
+function Headline({ text }){
+  // accent the last word for a subtle brand pop
+  const words = text.trim().split(/\s+/);
+  if(words.length<2) return <h1 className="headline">{text}</h1>;
+  const last = words.pop();
+  return <h1 className="headline">{words.join(" ")} <span className="accentword">{last}</span></h1>;
+}
+
+function App(){
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const theme = THEMES[t.theme] || THEMES.kek;
+  const styleVars = { ...theme, "--accent": t.accent };
+  delete styleVars.logo;
+
+  return (
+    <div className="scene" data-theme={t.theme} data-screen-label="Hamarosan kezdünk" style={styleVars}>
+      <div className="bg">
+        <div className="orb a" /><div className="orb b" /><div className="orb c" />
+      </div>
+      <div className="vignette" />
+
+      <div className="center">
+        <img className="logo" src={theme.logo} alt="Óbudai Egyetem" />
+        <Headline text={t.headline} />
+        {t.countdown
+          ? <Countdown minutes={t.minutes} key={t.minutes} />
+          : <Indicator kind={t.indicator} />}
+        {t.subtitle ? <p className="subtitle">{t.subtitle}</p> : null}
+      </div>
+
+      <div className="footer">
+        {t.showLive
+          ? <span className="live"><span className="ld" />{t.liveLabel}</span>
+          : <span />}
+        <span className="spacer" />
+        {t.showClock ? <Clock /> : <span />}
+      </div>
+
+      <TweaksPanel>
+        <TweakSection label="Szöveg" />
+        <TweakText label="Főcím" value={t.headline} onChange={v=>setTweak("headline", v)} />
+        <TweakText label="Alcím" value={t.subtitle} onChange={v=>setTweak("subtitle", v)} />
+
+        <TweakSection label="Megjelenés" />
+        <TweakRadio label="Háttér" value={t.theme} options={["kek","sotet","vilagos"]} onChange={v=>setTweak("theme", v)} />
+        <TweakColor label="Kiemelő szín" value={t.accent} options={["#06DCDC","#3DE8E8","#C9A24B","#ffffff"]} onChange={v=>setTweak("accent", v)} />
+
+        <TweakSection label="Animáció" />
+        <TweakRadio label="Jelző" value={t.indicator} options={["dots","bar","pulse"]} onChange={v=>setTweak("indicator", v)} />
+
+        <TweakSection label="Visszaszámláló" />
+        <TweakToggle label="Visszaszámláló" value={t.countdown} onChange={v=>setTweak("countdown", v)} />
+        <TweakNumber label="Perc" value={t.minutes} min={1} max={120} step={1} onChange={v=>setTweak("minutes", v)} />
+        <TweakButton label="Visszaszámláló indítása" onClick={()=>{
+          localStorage.setItem("oe_soon_end", String(Date.now()+t.minutes*60*1000));
+          localStorage.setItem("oe_soon_min", String(t.minutes));
+          setTweak("countdown", true);
+        }} />
+
+        <TweakSection label="Lábléc" />
+        <TweakToggle label="Élő jelzés" value={t.showLive} onChange={v=>setTweak("showLive", v)} />
+        <TweakText label="Élő felirat" value={t.liveLabel} onChange={v=>setTweak("liveLabel", v)} />
+        <TweakToggle label="Óra" value={t.showClock} onChange={v=>setTweak("showClock", v)} />
+      </TweaksPanel>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
