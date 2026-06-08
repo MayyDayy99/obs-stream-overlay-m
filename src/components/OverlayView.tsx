@@ -33,14 +33,11 @@ export function OverlayView() {
         isTimerActive={isTimerActive || false}
       />
 
-      <Link to="/controller" className="fixed top-4 right-4 z-[60]">
-        <Button
-          size="lg"
-          className="gap-2 bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white border border-white/20"
-        >
-          ⚙️ Vezérlő
-        </Button>
-      </Link>
+      <Link 
+        to="/controller" 
+        className="fixed top-0 right-0 w-24 h-24 z-[60] opacity-0 cursor-pointer"
+        title="Vezérlő"
+      />
     </div>
   )
 }
