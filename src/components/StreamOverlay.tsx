@@ -135,20 +135,21 @@ export function StreamOverlay({
   timerSeconds,
   isTimerActive,
 }: StreamOverlayProps) {
-  if (scene === 'live') {
-    return null
-  }
-
+  const isLive = scene === 'live'
   const themeVars = THEMES[theme] || THEMES.kek
-  const styleVars: Record<string, string> = { ...themeVars, '--accent': accentColor }
+  const styleVars: Record<string, string> = { 
+    ...themeVars, 
+    '--accent': accentColor,
+    background: isLive ? 'transparent' : 'var(--bg)'
+  }
   const logoSrc = theme === 'vilagos' ? oeLogoColor : oeLogo
   const headlineText = customMessage || sceneMessages[scene] || ''
   const subtitleText = subtitle || sceneSubtitles[scene] || ''
   const timerMinutes = Math.ceil(timerSeconds / 60)
 
   return (
-    <div className="overlay-scene" data-theme={theme} style={styleVars as React.CSSProperties}>
-      <div className="overlay-bg">
+    <div className={`overlay-scene ${isLive ? 'is-live' : ''}`} data-theme={theme} style={styleVars as React.CSSProperties}>
+      <div className="overlay-bg" style={{ opacity: isLive ? 0.35 : 1 }}>
         <div className="overlay-noise" />
         <div className="overlay-orb a" />
         <div className="overlay-orb b" />
@@ -156,16 +157,19 @@ export function StreamOverlay({
         <div className="overlay-orb d" />
         <div className="overlay-orb e" />
       </div>
-      <div className="overlay-vignette" />
+      
+      {!isLive && <div className="overlay-vignette" />}
 
-      <div className="overlay-center">
-        <img className="overlay-logo" src={logoSrc} alt="Óbudai Egyetem" />
-        <Headline text={headlineText} />
-        {isTimerActive
-          ? <Countdown minutes={timerMinutes} key={timerMinutes} />
-          : <Indicator kind={indicator} />}
-        {subtitleText && <p className="overlay-subtitle">{subtitleText}</p>}
-      </div>
+      {!isLive && (
+        <div className="overlay-center">
+          <img className="overlay-logo" src={logoSrc} alt="Óbudai Egyetem" />
+          <Headline text={headlineText} />
+          {isTimerActive
+            ? <Countdown minutes={timerMinutes} key={timerMinutes} />
+            : <Indicator kind={indicator} />}
+          {subtitleText && <p className="overlay-subtitle">{subtitleText}</p>}
+        </div>
+      )}
 
       <div className="overlay-footer">
         {showLive
