@@ -1,200 +1,165 @@
-import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import oeLogo from '@/assets/images/oe-logo.svg'
+import oeLogoColor from '@/assets/images/oe-logo-color.svg'
 
-type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending'
-type BackgroundType = 'gradient-wave' | 'geometric' | 'pulse' | 'particles'
+export type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending'
+export type ThemeType = 'kek' | 'sotet' | 'vilagos'
+export type IndicatorType = 'dots' | 'bar' | 'pulse'
 
 interface StreamOverlayProps {
   scene: SceneType
   customMessage: string
-  background: BackgroundType
+  theme: ThemeType
+  accentColor: string
+  indicator: IndicatorType
+  showLive: boolean
+  liveLabel: string
+  showClock: boolean
+  subtitle: string
   timerSeconds: number
   isTimerActive: boolean
 }
 
 const sceneMessages: Record<SceneType, string> = {
   'live': '',
-  'starting-soon': 'HAMAROSAN KEZDÜNK',
-  'break': 'EBÉDSZÜNET',
-  'coffee-break': 'KÁVÉSZÜNET',
-  'ending': 'KÖSZÖNJÜK A FIGYELMET'
+  'starting-soon': 'Hamarosan kezdünk',
+  'break': 'Ebédszünet',
+  'coffee-break': 'Kávészünet',
+  'ending': 'Köszönjük a figyelmet',
 }
 
-export function StreamOverlay({ scene, customMessage, background, timerSeconds, isTimerActive }: StreamOverlayProps) {
-  const [displayTime, setDisplayTime] = useState(timerSeconds)
+const sceneSubtitles: Record<SceneType, string> = {
+  'live': '',
+  'starting-soon': 'A közvetítés hamarosan elindul — köszönjük a türelmet.',
+  'break': 'Hamarosan folytatjuk a közvetítést.',
+  'coffee-break': 'Egy rövid szünet után folytatjuk.',
+  'ending': 'Köszönjük, hogy velünk voltatok!',
+}
 
-  useEffect(() => {
-    setDisplayTime(timerSeconds)
-  }, [timerSeconds])
+const THEMES = {
+  kek:     { '--bg': '#01298B', '--glow': '#1D4FD0', '--fg': '#ffffff', '--muted': 'rgba(255,255,255,.66)', '--line': 'rgba(255,255,255,.16)', '--vig': '.30' },
+  sotet:   { '--bg': '#070B18', '--glow': '#16306e', '--fg': '#ffffff', '--muted': 'rgba(255,255,255,.60)', '--line': 'rgba(255,255,255,.12)', '--vig': '.55' },
+  vilagos: { '--bg': '#EEF1F8', '--glow': '#9fb6ee', '--fg': '#01298B', '--muted': 'rgba(1,41,139,.60)', '--line': 'rgba(1,41,139,.16)', '--vig': '.05' },
+}
 
-  useEffect(() => {
-    if (!isTimerActive || displayTime <= 0) return
+function pad(n: number) { return String(n).padStart(2, '0') }
 
-    const interval = setInterval(() => {
-      setDisplayTime((prev) => Math.max(0, prev - 1))
-    }, 1000)
+function Headline({ text }: { text: string }) {
+  const words = text.trim().split(/\s+/)
+  if (words.length < 2) return <h1 className="overlay-headline">{text}</h1>
+  const last = words.pop()!
+  return <h1 className="overlay-headline">{words.join(' ')} <span className="accent-word">{last}</span></h1>
+}
 
-    return () => clearInterval(interval)
-  }, [isTimerActive, displayTime])
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
-
-  if (scene === 'live') {
-    return null
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      <AnimatedBackground type={background} />
-      
-      <div className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-16 p-16">
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
-          <h2 className="text-[64px] font-bold tracking-wide text-white drop-shadow-[0_0_40px_rgba(200,0,0,0.8)]">
-            ÓBUDAI EGYETEM
-          </h2>
-        </motion.div>
-
-        <div className="flex flex-col items-center gap-12">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={scene + customMessage}
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -20 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="text-center"
-            >
-              <h1 className="text-[96px] font-bold leading-none tracking-tight text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]">
-                {customMessage || sceneMessages[scene]}
-              </h1>
-            </motion.div>
-          </AnimatePresence>
-
-          {isTimerActive && displayTime > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1,
-              }}
-              className="font-mono text-[120px] font-bold leading-none text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.6)]"
-              style={{
-                animation: displayTime < 60 ? 'pulse 1s ease-in-out infinite' : 'none'
-              }}
-            >
-              {formatTime(displayTime)}
-            </motion.div>
-          )}
-        </div>
+function Indicator({ kind }: { kind: IndicatorType }) {
+  if (kind === 'bar') return <div className="overlay-indicator"><div className="overlay-bar" /></div>
+  if (kind === 'pulse') return (
+    <div className="overlay-indicator">
+      <div className="overlay-pulse">
+        <span className="ring" />
+        <span className="ring" />
+        <span className="core" />
       </div>
+    </div>
+  )
+  return (
+    <div className="overlay-indicator">
+      <div className="overlay-dots"><span /><span /><span /></div>
     </div>
   )
 }
 
-function AnimatedBackground({ type }: { type: BackgroundType }) {
-  switch (type) {
-    case 'gradient-wave':
-      return (
-        <div className="absolute inset-0">
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              background: 'linear-gradient(45deg, oklch(0.52 0.21 25), oklch(0.35 0.15 25), oklch(0.20 0.01 260))',
-              backgroundSize: '400% 400%'
-            }}
-            animate={{
-              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
-            }}
-            transition={{
-              duration: 15,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          />
-        </div>
-      )
-    
-    case 'geometric':
-      return (
-        <div className="absolute inset-0 bg-[oklch(0.20_0.01_260)]">
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-                repeating-linear-gradient(45deg, transparent, transparent 50px, oklch(0.52 0.21 25 / 0.15) 50px, oklch(0.52 0.21 25 / 0.15) 51px),
-                repeating-linear-gradient(-45deg, transparent, transparent 50px, oklch(0.60 0.24 20 / 0.15) 50px, oklch(0.60 0.24 20 / 0.15) 51px)
-              `
-            }}
-            animate={{
-              rotate: [0, 360]
-            }}
-            transition={{
-              duration: 60,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          />
-        </div>
-      )
-    
-    case 'pulse':
-      return (
-        <div className="absolute inset-0">
-          {[...Array(3)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute inset-0"
-              style={{
-                background: `radial-gradient(circle at center, oklch(0.52 0.21 25 / ${0.3 - i * 0.1}), transparent 70%)`
-              }}
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.5, 0, 0.5]
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                delay: i * 1.3,
-                ease: "easeInOut"
-              }}
-            />
-          ))}
-        </div>
-      )
-    
-    case 'particles':
-      return (
-        <div className="absolute inset-0 bg-[oklch(0.20_0.01_260)]">
-          {[...Array(50)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute h-2 w-2 rounded-full bg-white"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                y: [0, -100, 0],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: 3 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 5,
-                ease: "easeInOut"
-              }}
-            />
-          ))}
-        </div>
-      )
+function Countdown({ minutes }: { minutes: number }) {
+  const [left, setLeft] = useState(minutes * 60)
+
+  useEffect(() => {
+    const KEY = 'oe_soon_end'
+    let end = parseInt(localStorage.getItem(KEY) || '0', 10)
+    const storedMin = parseInt(localStorage.getItem('oe_soon_min') || '-1', 10)
+    const now = Date.now()
+    if (!end || end < now || storedMin !== minutes) {
+      end = now + minutes * 60 * 1000
+      localStorage.setItem(KEY, String(end))
+      localStorage.setItem('oe_soon_min', String(minutes))
+    }
+    const tick = () => setLeft(Math.max(0, Math.round((end - Date.now()) / 1000)))
+    tick()
+    const id = setInterval(tick, 250)
+    return () => clearInterval(id)
+  }, [minutes])
+
+  if (left <= 0) return <div className="overlay-countdown done">Mindjárt kezdünk!</div>
+  const m = Math.floor(left / 60), s = left % 60
+  return (
+    <div className="overlay-countdown">
+      <span>{pad(m)}</span><span className="col">:</span><span>{pad(s)}</span>
+    </div>
+  )
+}
+
+function Clock() {
+  const [t, setT] = useState('')
+  useEffect(() => {
+    const f = () => {
+      const d = new Date()
+      setT(pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()))
+    }
+    f()
+    const id = setInterval(f, 1000)
+    return () => clearInterval(id)
+  }, [])
+  return <span className="overlay-clock">{t}</span>
+}
+
+export function StreamOverlay({
+  scene,
+  customMessage,
+  theme,
+  accentColor,
+  indicator,
+  showLive,
+  liveLabel,
+  showClock,
+  subtitle,
+  timerSeconds,
+  isTimerActive,
+}: StreamOverlayProps) {
+  if (scene === 'live') {
+    return null
   }
+
+  const themeVars = THEMES[theme] || THEMES.kek
+  const styleVars: Record<string, string> = { ...themeVars, '--accent': accentColor }
+  const logoSrc = theme === 'vilagos' ? oeLogoColor : oeLogo
+  const headlineText = customMessage || sceneMessages[scene] || ''
+  const subtitleText = subtitle || sceneSubtitles[scene] || ''
+  const timerMinutes = Math.ceil(timerSeconds / 60)
+
+  return (
+    <div className="overlay-scene" data-theme={theme} style={styleVars as React.CSSProperties}>
+      <div className="overlay-bg">
+        <div className="overlay-orb a" />
+        <div className="overlay-orb b" />
+        <div className="overlay-orb c" />
+      </div>
+      <div className="overlay-vignette" />
+
+      <div className="overlay-center">
+        <img className="overlay-logo" src={logoSrc} alt="Óbudai Egyetem" />
+        <Headline text={headlineText} />
+        {isTimerActive
+          ? <Countdown minutes={timerMinutes} key={timerMinutes} />
+          : <Indicator kind={indicator} />}
+        {subtitleText && <p className="overlay-subtitle">{subtitleText}</p>}
+      </div>
+
+      <div className="overlay-footer">
+        {showLive
+          ? <span className="overlay-live"><span className="overlay-live-dot" />{liveLabel}</span>
+          : <span />}
+        <span className="spacer" />
+        {showClock ? <Clock /> : <span />}
+      </div>
+    </div>
+  )
 }

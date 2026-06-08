@@ -5,12 +5,13 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { 
-  Play, 
-  Broadcast, 
-  Coffee, 
-  ForkKnife, 
+import {
+  Play,
+  Broadcast,
+  Coffee,
+  ForkKnife,
   HandWaving,
   Clock,
   TextT,
@@ -18,21 +19,31 @@ import {
   Keyboard
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
-
-type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending'
-type BackgroundType = 'gradient-wave' | 'geometric' | 'pulse' | 'particles'
+import type { SceneType, ThemeType, IndicatorType } from '@/components/StreamOverlay'
 
 interface ControlPanelProps {
   currentScene: SceneType
   onSceneChange: (scene: SceneType) => void
   customMessage: string
   onCustomMessageChange: (message: string) => void
-  background: BackgroundType
-  onBackgroundChange: (bg: BackgroundType) => void
+  theme: ThemeType
+  onThemeChange: (theme: ThemeType) => void
+  accentColor: string
+  onAccentColorChange: (color: string) => void
+  indicator: IndicatorType
+  onIndicatorChange: (ind: IndicatorType) => void
   timerMinutes: number
   onTimerMinutesChange: (mins: number) => void
   isTimerActive: boolean
   onTimerToggle: () => void
+  showLive: boolean
+  onShowLiveChange: (v: boolean) => void
+  liveLabel: string
+  onLiveLabelChange: (v: string) => void
+  showClock: boolean
+  onShowClockChange: (v: boolean) => void
+  subtitle: string
+  onSubtitleChange: (v: string) => void
   previousScene: SceneType | null
   onUndo: () => void
   onShowHotkeys: () => void
@@ -42,14 +53,27 @@ const sceneButtons: Array<{
   scene: SceneType
   label: string
   icon: any
-  color: string
   hotkey: string
 }> = [
-  { scene: 'live', label: 'ÉLŐ', icon: Broadcast, color: 'primary', hotkey: '1' },
-  { scene: 'starting-soon', label: 'HAMAROSAN', icon: Play, color: 'accent', hotkey: '2' },
-  { scene: 'break', label: 'EBÉDSZÜNET', icon: ForkKnife, color: 'accent', hotkey: '3' },
-  { scene: 'coffee-break', label: 'KÁVÉSZÜNET', icon: Coffee, color: 'accent', hotkey: '4' },
-  { scene: 'ending', label: 'VÉGE', icon: HandWaving, color: 'accent', hotkey: '5' },
+  { scene: 'live', label: 'ÉLŐ', icon: Broadcast, hotkey: '1' },
+  { scene: 'starting-soon', label: 'HAMAROSAN', icon: Play, hotkey: '2' },
+  { scene: 'break', label: 'EBÉDSZÜNET', icon: ForkKnife, hotkey: '3' },
+  { scene: 'coffee-break', label: 'KÁVÉSZÜNET', icon: Coffee, hotkey: '4' },
+  { scene: 'ending', label: 'VÉGE', icon: HandWaving, hotkey: '5' },
+]
+
+const themeOptions: Array<{ id: ThemeType; label: string; preview: string }> = [
+  { id: 'kek', label: 'Kék', preview: '#01298B' },
+  { id: 'sotet', label: 'Sötét', preview: '#070B18' },
+  { id: 'vilagos', label: 'Világos', preview: '#EEF1F8' },
+]
+
+const accentOptions = ['#06DCDC', '#3DE8E8', '#C9A24B', '#ffffff']
+
+const indicatorOptions: Array<{ id: IndicatorType; label: string }> = [
+  { id: 'dots', label: 'Pontok' },
+  { id: 'bar', label: 'Sáv' },
+  { id: 'pulse', label: 'Pulzus' },
 ]
 
 export function ControlPanel({
@@ -57,18 +81,30 @@ export function ControlPanel({
   onSceneChange,
   customMessage,
   onCustomMessageChange,
-  background,
-  onBackgroundChange,
+  theme,
+  onThemeChange,
+  accentColor,
+  onAccentColorChange,
+  indicator,
+  onIndicatorChange,
   timerMinutes,
   onTimerMinutesChange,
   isTimerActive,
   onTimerToggle,
+  showLive,
+  onShowLiveChange,
+  liveLabel,
+  onLiveLabelChange,
+  showClock,
+  onShowClockChange,
+  subtitle,
+  onSubtitleChange,
   previousScene,
   onUndo,
   onShowHotkeys
 }: ControlPanelProps) {
-  const overlayUrl = `${window.location.origin}/`
-  
+  const overlayUrl = `${window.location.origin}${window.location.pathname}`
+
   return (
     <div className="flex min-h-screen flex-col gap-6 p-8">
       <div className="flex items-center justify-between">
@@ -76,7 +112,7 @@ export function ControlPanel({
           <h1 className="text-4xl font-bold tracking-tight text-primary">Óbudai Egyetem</h1>
           <p className="text-xl text-muted-foreground">Stream Vezérlő</p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
@@ -98,7 +134,7 @@ export function ControlPanel({
               Vissza
             </Button>
           )}
-          <Badge 
+          <Badge
             variant={currentScene === 'live' ? 'default' : 'secondary'}
             className={cn(
               "px-4 py-2 text-sm font-bold",
@@ -133,13 +169,14 @@ export function ControlPanel({
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        {/* Scenes */}
         <Card className="p-6">
           <h2 className="mb-4 text-xl font-bold">Jelenetek</h2>
           <div className="grid grid-cols-2 gap-4">
             {sceneButtons.map((btn) => {
               const Icon = btn.icon
               const isActive = currentScene === btn.scene
-              
+
               return (
                 <motion.div key={btn.scene} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
@@ -150,8 +187,8 @@ export function ControlPanel({
                     )}
                     variant={isActive ? 'default' : 'outline'}
                   >
-                    <Badge 
-                      variant="secondary" 
+                    <Badge
+                      variant="secondary"
                       className="absolute top-2 right-2 font-mono text-xs font-bold"
                     >
                       {btn.hotkey}
@@ -165,57 +202,108 @@ export function ControlPanel({
           </div>
         </Card>
 
+        {/* Custom Message + Subtitle */}
         <Card className="p-6">
           <div className="mb-4 flex items-center gap-2">
             <TextT size={24} weight="bold" />
-            <h2 className="text-xl font-bold">Egyedi Üzenet</h2>
+            <h2 className="text-xl font-bold">Szövegek</h2>
           </div>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="custom-message">Szöveg</Label>
+              <Label htmlFor="custom-message">Egyedi főcím (felülírja a jelenet címét)</Label>
               <Textarea
                 id="custom-message"
                 placeholder="Írd be az egyedi üzenetet..."
                 value={customMessage}
                 onChange={(e) => onCustomMessageChange(e.target.value)}
-                className="mt-2 min-h-[100px] text-base"
+                className="mt-2 min-h-[80px] text-base"
               />
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {customMessage.length} karakter
               </p>
             </div>
+            <div>
+              <Label htmlFor="subtitle">Alcím</Label>
+              <Input
+                id="subtitle"
+                placeholder="Egyedi alcím szöveg..."
+                value={subtitle}
+                onChange={(e) => onSubtitleChange(e.target.value)}
+                className="mt-2"
+              />
+            </div>
             <Button
               variant="outline"
-              onClick={() => onCustomMessageChange('')}
-              disabled={!customMessage}
+              onClick={() => { onCustomMessageChange(''); onSubtitleChange(''); }}
+              disabled={!customMessage && !subtitle}
               className="w-full"
             >
-              Törlés
+              Szövegek törlése
             </Button>
           </div>
         </Card>
 
+        {/* Theme */}
         <Card className="p-6">
-          <h2 className="mb-4 text-xl font-bold">Háttér Animáció</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { id: 'gradient-wave', label: 'Színes Hullám' },
-              { id: 'geometric', label: 'Geometrikus' },
-              { id: 'pulse', label: 'Pulzáló' },
-              { id: 'particles', label: 'Részecskék' },
-            ].map((bg) => (
-              <Button
-                key={bg.id}
-                variant={background === bg.id ? 'default' : 'outline'}
-                onClick={() => onBackgroundChange(bg.id as BackgroundType)}
-                className="h-20"
-              >
-                {bg.label}
-              </Button>
-            ))}
+          <h2 className="mb-4 text-xl font-bold">Megjelenés</h2>
+          <div className="space-y-4">
+            <div>
+              <Label>Háttér téma</Label>
+              <div className="grid grid-cols-3 gap-3 mt-2">
+                {themeOptions.map((t) => (
+                  <Button
+                    key={t.id}
+                    variant={theme === t.id ? 'default' : 'outline'}
+                    onClick={() => onThemeChange(t.id)}
+                    className="h-16 flex-col gap-1"
+                  >
+                    <div
+                      className="w-8 h-8 rounded-full border border-white/20"
+                      style={{ background: t.preview }}
+                    />
+                    <span className="text-xs">{t.label}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Kiemelő szín</Label>
+              <div className="flex gap-3 mt-2">
+                {accentOptions.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => onAccentColorChange(color)}
+                    className={cn(
+                      "w-12 h-12 rounded-lg border-2 transition-all",
+                      accentColor === color
+                        ? "border-primary ring-2 ring-primary scale-110"
+                        : "border-white/20 hover:scale-105"
+                    )}
+                    style={{ background: color }}
+                    title={color}
+                  />
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Jelző animáció</Label>
+              <div className="grid grid-cols-3 gap-3 mt-2">
+                {indicatorOptions.map((ind) => (
+                  <Button
+                    key={ind.id}
+                    variant={indicator === ind.id ? 'default' : 'outline'}
+                    onClick={() => onIndicatorChange(ind.id)}
+                    className="h-12"
+                  >
+                    {ind.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
           </div>
         </Card>
 
+        {/* Timer */}
         <Card className="p-6">
           <div className="mb-4 flex items-center gap-2">
             <Clock size={24} weight="bold" />
@@ -242,6 +330,31 @@ export function ControlPanel({
             >
               {isTimerActive ? 'Időzítő Leállítása' : 'Időzítő Indítása'}
             </Button>
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-border">
+            <h3 className="mb-4 text-lg font-bold">Lábléc beállítások</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="show-live">Élő jelzés</Label>
+                <Switch id="show-live" checked={showLive} onCheckedChange={onShowLiveChange} />
+              </div>
+              {showLive && (
+                <div>
+                  <Label htmlFor="live-label">Élő felirat</Label>
+                  <Input
+                    id="live-label"
+                    value={liveLabel}
+                    onChange={(e) => onLiveLabelChange(e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <Label htmlFor="show-clock">Óra megjelenítése</Label>
+                <Switch id="show-clock" checked={showClock} onCheckedChange={onShowClockChange} />
+              </div>
+            </div>
           </div>
         </Card>
       </div>
