@@ -51,7 +51,18 @@ export function StreamOverlay({ scene, customMessage, background, timerSeconds, 
     <div className="fixed inset-0 z-50 overflow-hidden">
       <AnimatedBackground type={background} />
       
-      <div className="relative z-10 flex h-full w-full items-center justify-center p-16">
+      <div className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-16 p-16">
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
+          <h2 className="text-[64px] font-bold tracking-wide text-white drop-shadow-[0_0_40px_rgba(200,0,0,0.8)]">
+            ÓBUDAI EGYETEM
+          </h2>
+        </motion.div>
+
         <div className="flex flex-col items-center gap-12">
           <AnimatePresence mode="wait">
             <motion.div
@@ -97,7 +108,7 @@ function AnimatedBackground({ type }: { type: BackgroundType }) {
           <motion.div
             className="absolute inset-0"
             style={{
-              background: 'linear-gradient(45deg, oklch(0.45 0.18 250), oklch(0.68 0.19 45), oklch(0.75 0.15 200))',
+              background: 'linear-gradient(45deg, oklch(0.52 0.21 25), oklch(0.35 0.15 25), oklch(0.20 0.01 260))',
               backgroundSize: '400% 400%'
             }}
             animate={{
@@ -114,13 +125,13 @@ function AnimatedBackground({ type }: { type: BackgroundType }) {
     
     case 'geometric':
       return (
-        <div className="absolute inset-0 bg-[oklch(0.20_0.02_250)]">
+        <div className="absolute inset-0 bg-[oklch(0.20_0.01_260)]">
           <motion.div
             className="absolute inset-0"
             style={{
               backgroundImage: `
-                repeating-linear-gradient(45deg, transparent, transparent 50px, oklch(0.45 0.18 250 / 0.1) 50px, oklch(0.45 0.18 250 / 0.1) 51px),
-                repeating-linear-gradient(-45deg, transparent, transparent 50px, oklch(0.68 0.19 45 / 0.1) 50px, oklch(0.68 0.19 45 / 0.1) 51px)
+                repeating-linear-gradient(45deg, transparent, transparent 50px, oklch(0.52 0.21 25 / 0.15) 50px, oklch(0.52 0.21 25 / 0.15) 51px),
+                repeating-linear-gradient(-45deg, transparent, transparent 50px, oklch(0.60 0.24 20 / 0.15) 50px, oklch(0.60 0.24 20 / 0.15) 51px)
               `
             }}
             animate={{
@@ -143,7 +154,7 @@ function AnimatedBackground({ type }: { type: BackgroundType }) {
               key={i}
               className="absolute inset-0"
               style={{
-                background: `radial-gradient(circle at center, oklch(0.45 0.18 250 / ${0.3 - i * 0.1}), transparent 70%)`
+                background: `radial-gradient(circle at center, oklch(0.52 0.21 25 / ${0.3 - i * 0.1}), transparent 70%)`
               }}
               animate={{
                 scale: [1, 1.5, 1],
@@ -162,7 +173,7 @@ function AnimatedBackground({ type }: { type: BackgroundType }) {
     
     case 'particles':
       return (
-        <div className="absolute inset-0 bg-[oklch(0.15_0.01_250)]">
+        <div className="absolute inset-0 bg-[oklch(0.20_0.01_260)]">
           {[...Array(50)].map((_, i) => (
             <motion.div
               key={i}

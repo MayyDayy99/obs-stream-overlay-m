@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { toast } from 'sonner'
 import { 
   Play, 
   Broadcast, 
@@ -66,12 +67,14 @@ export function ControlPanel({
   onUndo,
   onShowHotkeys
 }: ControlPanelProps) {
+  const overlayUrl = `${window.location.origin}/`
+  
   return (
     <div className="flex min-h-screen flex-col gap-6 p-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight">Stream Vezérlő</h1>
-          <p className="text-muted-foreground">OBS Browser Source Manager</p>
+          <h1 className="text-4xl font-bold tracking-tight text-primary">Óbudai Egyetem</h1>
+          <p className="text-xl text-muted-foreground">Stream Vezérlő</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -107,6 +110,28 @@ export function ControlPanel({
         </div>
       </div>
 
+      <Card className="p-6 border-primary/30">
+        <h3 className="mb-3 text-lg font-bold">OBS Browser Source URL</h3>
+        <div className="flex gap-3 items-center">
+          <code className="flex-1 rounded-md bg-secondary px-4 py-3 text-sm font-mono">
+            {overlayUrl}
+          </code>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              navigator.clipboard.writeText(overlayUrl)
+              toast.success('URL másolva a vágólapra')
+            }}
+          >
+            Másolás
+          </Button>
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Ajánlott felbontás: 1920x1080 | Add hozzá OBS-ben mint Browser Source
+        </p>
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="p-6">
           <h2 className="mb-4 text-xl font-bold">Jelenetek</h2>
@@ -121,7 +146,7 @@ export function ControlPanel({
                     onClick={() => onSceneChange(btn.scene)}
                     className={cn(
                       "relative h-32 w-full flex-col gap-3 text-lg font-bold transition-all",
-                      isActive && "ring-4 ring-ring shadow-[0_0_20px_rgba(116,195,251,0.5)]"
+                      isActive && "ring-4 ring-primary shadow-[0_0_20px_rgba(200,0,0,0.5)]"
                     )}
                     variant={isActive ? 'default' : 'outline'}
                   >
@@ -226,15 +251,15 @@ export function ControlPanel({
         <div className="grid gap-4 text-sm text-muted-foreground md:grid-cols-3">
           <div>
             <p className="font-semibold text-foreground">1. OBS Browser Source</p>
-            <p>Másold be ezt az URL-t az OBS-be mint Browser Source (1920x1080)</p>
+            <p>Másold be a fenti URL-t az OBS-be mint Browser Source (1920x1080)</p>
           </div>
           <div>
             <p className="font-semibold text-foreground">2. Jelenetek Váltása</p>
-            <p>Kattints a jelenet gombokra az overlay megjelenítéséhez</p>
+            <p>Kattints a jelenet gombokra vagy használd a gyorsbillentyűket (1-5)</p>
           </div>
           <div>
             <p className="font-semibold text-foreground">3. Időzítő</p>
-            <p>Állítsd be a perceket és indítsd el a visszaszámlálást</p>
+            <p>Állítsd be a perceket és indítsd el a visszaszámlálást (T gomb)</p>
           </div>
         </div>
       </Card>

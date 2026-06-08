@@ -1,23 +1,49 @@
-# ✨ Welcome to Your Spark Template!
-You've just launched your brand-new Spark Template Codespace — everything’s fired up and ready for you to explore, build, and create with Spark!
+# Óbudai Egyetem - Stream Vezérlő
 
-This template is your blank canvas. It comes with a minimal setup to help you get started quickly with Spark development.
+Professional OBS streaming overlay manager for Óbuda University broadcasts with dedicated controller interface and real-time scene management.
 
-🚀 What's Inside?
-- A clean, minimal Spark environment
-- Pre-configured for local development
-- Ready to scale with your ideas
-  
-🧠 What Can You Do?
+## 🎯 Features
 
-Right now, this is just a starting point — the perfect place to begin building and testing your Spark applications.
+- **Dedicated Controller Interface**: Separate `/controller` page for managing overlays while OBS displays the clean overlay view
+- **University Branding**: Professional Óbuda University branding with official color scheme
+- **Instant Scene Switching**: Quick access to common stream states (Live, Starting Soon, Break, Coffee Break, Ending)
+- **Keyboard Shortcuts**: Full hotkey support for rapid scene changes during live streams
+- **Custom Messages**: Display custom text overlays for announcements
+- **Animated Backgrounds**: Multiple background animation options (Gradient Wave, Geometric, Pulse, Particles)
+- **Countdown Timer**: Built-in timer for breaks with visual countdown
+- **State Persistence**: All settings persist across sessions
 
-🧹 Just Exploring?
-No problem! If you were just checking things out and don’t need to keep this code:
+## 🚀 Quick Start
 
-- Simply delete your Spark.
-- Everything will be cleaned up — no traces left behind.
+1. **Setup OBS Browser Source**:
+   - Navigate to `/controller` in your browser
+   - Copy the overlay URL from the top card
+   - Add a new Browser Source in OBS (1920x1080)
+   - Paste the overlay URL
+   - The overlay will display at the root path (`/`)
 
-📄 License For Spark Template Resources 
+2. **Control Your Stream**:
+   - Keep `/controller` open on a separate screen
+   - Use buttons or keyboard shortcuts to change scenes
+   - All changes sync instantly to the OBS overlay
+
+## ⌨️ Keyboard Shortcuts
+
+- `1` - ÉLŐ (Live)
+- `2` - HAMAROSAN (Starting Soon)
+- `3` - EBÉDSZÜNET (Lunch Break)
+- `4` - KÁVÉSZÜNET (Coffee Break)
+- `5` - VÉGE (Ending)
+- `T` - Toggle timer
+- `Ctrl+Z` - Undo scene change
+- `?` - Show hotkey reference
+
+## 🎨 Customization
+
+- **Custom Messages**: Type any text in the control panel to override default scene messages
+- **Background Styles**: Choose from 4 different animated background styles
+- **Timer Duration**: Set custom break duration in minutes
+
+## 📄 License
 
 The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.

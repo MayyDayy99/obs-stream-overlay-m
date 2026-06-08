@@ -15,9 +15,23 @@ This is a control panel with several preset overlay states that need to persist 
 ### Scene Management
 - **Functionality**: Toggle between different stream states (Starting Soon, Live, Break, Coffee Break, Ending)
 - **Purpose**: Quick access to common stream overlays without fumbling through OBS scenes
-- **Trigger**: Large button clicks from the control panel OR keyboard shortcuts (1-5 keys)
+- **Trigger**: Large button clicks from the control panel at /controller OR keyboard shortcuts (1-5 keys)
 - **Progression**: Click scene button / Press hotkey → Immediate full-screen overlay transition → Background animation loops → Return to Live when ready
 - **Success criteria**: Overlay changes within 100ms, animations loop smoothly, previous state is remembered, hotkeys work from anywhere in the control panel
+
+### Dedicated Controller Page
+- **Functionality**: Separate /controller route for managing stream overlays while the root path displays the OBS Browser Source overlay
+- **Purpose**: Allows streamers to control the overlay on a separate screen/device while OBS captures the clean overlay view
+- **Trigger**: Navigate to /controller URL
+- **Progression**: Open /controller in browser → View control panel with all settings → Copy root URL → Add as Browser Source in OBS → Control from /controller
+- **Success criteria**: Root path shows only overlay, /controller shows control panel, changes sync instantly via KV store, URL copying works
+
+### University Branding
+- **Functionality**: Display "ÓBUDAI EGYETEM" prominently on all overlays and use university red color scheme
+- **Purpose**: Professional institutional branding for educational streaming
+- **Trigger**: Displayed automatically on all non-live overlays
+- **Progression**: Scene activates → University name appears at top → Scene message displays below → Background animates with university colors
+- **Success criteria**: University branding visible, colors match official palette, readable at 1080p
 
 ### Keyboard Shortcuts
 - **Functionality**: Global keyboard shortcuts for instant scene switching without needing to click
@@ -59,32 +73,33 @@ This is a control panel with several preset overlay states that need to persist 
 
 ## Design Direction
 
-The design should feel like a professional broadcast control room - confident, precise, and unambiguous. Think mission control aesthetics with bold typography, high contrast elements, and tactile button interactions that feel satisfying to press repeatedly during a live stream.
+The design should reflect Óbuda University's professional academic identity - authoritative, modern, and institutional. The interface should embody university values with bold typography, strong red accents from the university brand, and professional interactions suitable for educational broadcasting.
 
 ## Color Selection
 
-A bold, high-energy palette that evokes professional broadcasting equipment with LED indicators and control panels.
+A professional university palette built around Óbuda University's signature red with academic grays and clean whites.
 
-- **Primary Color**: Deep Electric Blue (oklch(0.45 0.18 250)) - Represents the "live" state, commands attention like broadcast indicator lights
+- **Primary Color**: Óbuda University Red (oklch(0.52 0.21 25)) - The signature university brand color, represents institutional authority and live broadcast states
 - **Secondary Colors**: 
-  - Dark Slate Background (oklch(0.15 0.01 250)) - Professional control panel aesthetic
-  - Bright Cyan Accent (oklch(0.75 0.15 200)) - Active states and highlights
-- **Accent Color**: Vibrant Orange (oklch(0.68 0.19 45)) - Break states, warnings, and call-to-action buttons
+  - Deep Charcoal Background (oklch(0.20 0.01 260)) - Professional academic control panel aesthetic
+  - Light Gray Surface (oklch(0.94 0.005 260)) - Clean secondary surfaces
+- **Accent Color**: Bright Crimson (oklch(0.60 0.24 20)) - Active states, warnings, and important actions
 - **Foreground/Background Pairings**: 
-  - Primary Blue (oklch(0.45 0.18 250)): White text (oklch(0.98 0 0)) - Ratio 8.2:1 ✓
-  - Dark Slate (oklch(0.15 0.01 250)): White text (oklch(0.98 0 0)) - Ratio 13.5:1 ✓
-  - Vibrant Orange (oklch(0.68 0.19 45)): Black text (oklch(0.15 0 0)) - Ratio 7.1:1 ✓
-  - Bright Cyan (oklch(0.75 0.15 200)): Black text (oklch(0.15 0 0)) - Ratio 9.8:1 ✓
+  - University Red (oklch(0.52 0.21 25)): White text (oklch(0.98 0 0)) - Ratio 5.8:1 ✓
+  - Deep Charcoal (oklch(0.20 0.01 260)): White text (oklch(0.98 0 0)) - Ratio 12.1:1 ✓
+  - Bright Crimson (oklch(0.60 0.24 20)): White text (oklch(0.98 0 0)) - Ratio 4.9:1 ✓
+  - Light Gray (oklch(0.94 0.005 260)): Dark text (oklch(0.20 0.01 260)) - Ratio 11.8:1 ✓
 
 ## Font Selection
 
-Typography should be bold, geometric, and instantly readable - like airport departure boards or stadium scoreboards that communicate information at a glance.
+Typography should be professional and academic - clear, authoritative, and modern, reflecting the institutional nature of Óbuda University while maintaining excellent readability.
 
 - **Typographic Hierarchy**:
-  - H1 (Scene Labels): Space Grotesk Bold/48px/tight tracking for maximum impact
-  - H2 (Overlay Messages): Space Grotesk Bold/96px/tight tracking for on-stream visibility
-  - Body (Controls): Space Grotesk Medium/16px/normal tracking for UI clarity
-  - Timer Display: JetBrains Mono Bold/120px/monospace for digital clock aesthetic
+  - H1 (Scene Labels): Inter Bold/48px/tight tracking for institutional authority
+  - H2 (Overlay Messages): Inter Bold/96px/tight tracking for on-stream visibility
+  - Body (Controls): Inter Medium/16px/normal tracking for UI clarity
+  - Timer Display: JetBrains Mono Bold/120px/monospace for digital precision
+  - University Branding: Inter Bold for "Óbudai Egyetem" lockup
 
 ## Animations
 
