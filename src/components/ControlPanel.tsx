@@ -16,7 +16,8 @@ import {
   Clock,
   TextT,
   ArrowCounterClockwise,
-  Keyboard
+  Keyboard,
+  Warning
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import type { SceneType, ThemeType, IndicatorType } from '@/components/StreamOverlay'
@@ -60,6 +61,7 @@ const sceneButtons: Array<{
   { scene: 'break', label: 'EBÉDSZÜNET', icon: ForkKnife, hotkey: '3' },
   { scene: 'coffee-break', label: 'KÁVÉSZÜNET', icon: Coffee, hotkey: '4' },
   { scene: 'ending', label: 'VÉGE', icon: HandWaving, hotkey: '5' },
+  { scene: 'technical-issue', label: 'TECHNIKAI SZÜNET', icon: Warning, hotkey: '6' },
 ]
 
 const themeOptions: Array<{ id: ThemeType; label: string; preview: string }> = [

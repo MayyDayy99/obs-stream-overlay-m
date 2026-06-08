@@ -3,7 +3,7 @@ import oeLogo from '@/assets/images/oe-logo.svg'
 import oeLogoColor from '@/assets/images/oe-logo-color.svg'
 import { FloatingOE } from './FloatingOE'
 
-export type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending'
+export type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending' | 'technical-issue'
 export type ThemeType = 'kek' | 'sotet' | 'vilagos'
 export type IndicatorType = 'dots' | 'bar' | 'pulse' | 'hologram' | 'morph'
 
@@ -27,6 +27,7 @@ const sceneMessages: Record<SceneType, string> = {
   'break': 'Ebédszünet',
   'coffee-break': 'Kávészünet',
   'ending': 'Köszönjük a figyelmet',
+  'technical-issue': 'Technikai szünet',
 }
 
 const sceneSubtitles: Record<SceneType, string> = {
@@ -35,6 +36,7 @@ const sceneSubtitles: Record<SceneType, string> = {
   'break': 'Hamarosan folytatjuk a közvetítést.',
   'coffee-break': 'Egy rövid szünet után folytatjuk.',
   'ending': 'Köszönjük, hogy velünk voltatok!',
+  'technical-issue': 'Kérjük türelmüket, dolgozunk a hiba elhárításán.',
 }
 
 const THEMES = {
@@ -150,7 +152,7 @@ export function StreamOverlay({
 
   return (
     <div className={`overlay-scene ${isLive ? 'is-live' : ''}`} data-theme={theme} style={styleVars as React.CSSProperties}>
-      <div className="overlay-bg" style={{ opacity: isLive ? 0.35 : 1 }}>
+      <div className="overlay-bg" style={{ opacity: isLive ? 0.6 : 1 }}>
         <FloatingOE />
         <div className="overlay-noise" />
         <div className="overlay-orb a" />
