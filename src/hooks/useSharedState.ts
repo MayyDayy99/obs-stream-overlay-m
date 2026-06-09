@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
-import mqtt from 'mqtt'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
-// Generate or get ROOM ID
-function getRoomId() {
+// ─── Room ID ───────────────────────────────────────────────
+function getRoomId(): string {
   const urlParams = new URLSearchParams(window.location.search)
   let room = urlParams.get('room')
   if (!room) {
@@ -15,79 +14,254 @@ function getRoomId() {
 }
 
 export const ROOM_ID = getRoomId()
-const TOPIC_BASE = `obs-overlay-oe/${ROOM_ID}`
 
-let mqttClient: mqtt.MqttClient | null = null
-const subscribers = new Set<(data: { key: string, value: any }) => void>()
+// ─── Sync Engine (jsonbin.io free tier – no signup) ────────
+// We use a simple JSON key-value store via jsonbin.io (free, no auth)
+// Fallback: JSONBin.io public bins
 
-function initMqtt() {
-  if (mqttClient) return
-  
-  // Use public free MQTT broker over WebSockets
-  mqttClient = mqtt.connect('wss://broker.hivemq.com:8000/mqtt')
+const BIN_STORAGE_KEY = `obs-overlay-bin-${ROOM_ID}`
+const POLL_INTERVAL = 800 // ms – fast enough for real-time feel
 
-  mqttClient.on('connect', () => {
-    console.log('Connected to MQTT room', ROOM_ID)
-    // Subscribe to all state keys for this room
-    mqttClient?.subscribe(`${TOPIC_BASE}/+`)
-  })
+// In-memory state that all hooks share
+const sharedState: Record<string, any> = {}
+const listeners = new Map<string, Set<(val: any) => void>>()
+let binId: string | null = null
+let binReady = false
+let pendingWrites: Record<string, any> = {}
+let writeTimer: ReturnType<typeof setTimeout> | null = null
+let pollTimer: ReturnType<typeof setInterval> | null = null
+let lastEtag = ''
 
-  mqttClient.on('message', (topic, message) => {
-    if (topic.startsWith(TOPIC_BASE)) {
-      const key = topic.split('/').pop()
-      if (!key) return
-      
-      try {
-        const value = JSON.parse(message.toString())
-        subscribers.forEach(cb => cb({ key, value }))
-      } catch (e) {
-        console.error('MQTT parse error', e)
-      }
-    }
-  })
+// Connection status
+type ConnectionStatus = 'connecting' | 'connected' | 'error'
+let connectionStatus: ConnectionStatus = 'connecting'
+const statusListeners = new Set<(status: ConnectionStatus) => void>()
+
+function setConnectionStatus(s: ConnectionStatus) {
+  connectionStatus = s
+  statusListeners.forEach(cb => cb(s))
 }
 
-// Initializing immediately
-initMqtt()
+export function useConnectionStatus(): ConnectionStatus {
+  const [status, setStatus] = useState<ConnectionStatus>(connectionStatus)
+  useEffect(() => {
+    statusListeners.add(setStatus)
+    return () => { statusListeners.delete(setStatus) }
+  }, [])
+  return status
+}
 
-// Original local storage reader
+// ─── JSONBin.io API helpers ────────────────────────────────
+const JSONBIN_API = 'https://api.jsonbin.io/v3'
+// We use a master key for a free public bin (X-Master-Key is required but free)
+// Instead, let's use a simpler approach: npoint.io (free, no auth, instant)
+const NPOINT_API = 'https://api.npoint.io'
+
+async function createBin(): Promise<string> {
+  // Try loading existing bin ID from localStorage
+  const savedBin = localStorage.getItem(BIN_STORAGE_KEY)
+  if (savedBin) {
+    try {
+      const resp = await fetch(`${NPOINT_API}/${savedBin}`)
+      if (resp.ok) {
+        const data = await resp.json()
+        Object.assign(sharedState, data)
+        return savedBin
+      }
+    } catch { /* bin doesn't exist anymore, create new */ }
+  }
+
+  // Create a new bin
+  const resp = await fetch('https://api.npoint.io/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({})
+  })
+
+  if (!resp.ok) throw new Error('Failed to create npoint bin')
+  // npoint returns the URL of the new document
+  const data = await resp.json()
+  // The response from npoint POST is just the data, but the URL is in the Location header
+  // Actually npoint.io doesn't have a public create API easily. Let me use a different approach.
+  throw new Error('npoint creation not straightforward')
+}
+
+// ─── Simpler approach: use val.town or a peer-to-peer WebSocket relay ───
+
+// Let's use the simplest possible approach that actually works:
+// A free WebSocket relay service (piesocket free plan or similar)
+// 
+// Actually, the SIMPLEST reliable approach: Ably free tier with anonymous auth
+// Free: 6M messages/month, no credit card
+//
+// But that requires an API key...
+//
+// OK, truly the simplest: use the Window.postMessage API + a shared iframe,
+// or use a WebSocket echo server.
+//
+// FINAL ANSWER: Use a combination of:
+// 1. Same device: BroadcastChannel (instant)
+// 2. Cross device: Simple WebSocket relay via free public echo server
+
+// ─── CLEAN APPROACH: WebSocket via free relay ──────────────
+// We'll use a simple shared WebSocket room approach
+
+const WS_URLS = [
+  // Free WebSocket relay services
+  `wss://free.blr2.piesocket.com/v3/${ROOM_ID}?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self`,
+]
+
+let ws: WebSocket | null = null
+let wsConnected = false
+let reconnectAttempt = 0
+const MAX_RECONNECT_DELAY = 10000
+
+function notifyListeners(key: string, value: any) {
+  listeners.get(key)?.forEach(cb => cb(value))
+}
+
+function connectWs() {
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+    return
+  }
+
+  const url = WS_URLS[0]
+  setConnectionStatus('connecting')
+
+  try {
+    ws = new WebSocket(url)
+  } catch (e) {
+    console.error('WebSocket create error:', e)
+    setConnectionStatus('error')
+    scheduleReconnect()
+    return
+  }
+
+  ws.onopen = () => {
+    console.log(`[sync] Connected to room ${ROOM_ID}`)
+    wsConnected = true
+    reconnectAttempt = 0
+    setConnectionStatus('connected')
+
+    // Request full state sync from other connected clients
+    ws?.send(JSON.stringify({ type: 'sync-request', room: ROOM_ID }))
+  }
+
+  ws.onmessage = (event) => {
+    try {
+      const msg = JSON.parse(event.data)
+      if (msg.type === 'state-update' && msg.key) {
+        sharedState[msg.key] = msg.value
+        try { localStorage.setItem(msg.key, JSON.stringify(msg.value)) } catch {}
+        notifyListeners(msg.key, msg.value)
+      } else if (msg.type === 'sync-request') {
+        // Another client is requesting full state – send everything we have
+        const keys = Object.keys(sharedState)
+        if (keys.length > 0) {
+          ws?.send(JSON.stringify({
+            type: 'sync-response',
+            state: sharedState
+          }))
+        }
+      } else if (msg.type === 'sync-response' && msg.state) {
+        // Received full state from another client
+        for (const [key, value] of Object.entries(msg.state)) {
+          sharedState[key] = value
+          try { localStorage.setItem(key, JSON.stringify(value)) } catch {}
+          notifyListeners(key, value)
+        }
+      }
+    } catch (e) {
+      // Ignore non-JSON messages (PieSocket sends some system messages)
+    }
+  }
+
+  ws.onerror = (e) => {
+    console.error('[sync] WebSocket error', e)
+    setConnectionStatus('error')
+  }
+
+  ws.onclose = () => {
+    console.log('[sync] WebSocket closed, reconnecting...')
+    wsConnected = false
+    ws = null
+    setConnectionStatus('error')
+    scheduleReconnect()
+  }
+}
+
+function scheduleReconnect() {
+  const delay = Math.min(1000 * Math.pow(2, reconnectAttempt), MAX_RECONNECT_DELAY)
+  reconnectAttempt++
+  setTimeout(connectWs, delay)
+}
+
+function publishState(key: string, value: any) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({
+      type: 'state-update',
+      key,
+      value
+    }))
+  }
+}
+
+// Initialize connection
+connectWs()
+
+// ─── localStorage helper ───────────────────────────────────
 function readStorage<T>(key: string, defaultValue: T): T {
   try {
     const stored = localStorage.getItem(key)
     if (stored !== null) {
-      return JSON.parse(stored) as T
+      const parsed = JSON.parse(stored) as T
+      sharedState[key] = parsed
+      return parsed
     }
-  } catch {
-  }
+  } catch {}
   return defaultValue
 }
 
+// ─── BroadcastChannel for same-device tabs ─────────────────
+const CHANNEL_NAME = 'obs-stream-overlay-sync'
+let broadcastChannel: BroadcastChannel | null = null
+try {
+  broadcastChannel = new BroadcastChannel(CHANNEL_NAME)
+  broadcastChannel.onmessage = (event) => {
+    if (event.data?.key && event.data?.value !== undefined) {
+      sharedState[event.data.key] = event.data.value
+      notifyListeners(event.data.key, event.data.value)
+    }
+  }
+} catch {}
+
+// ─── Hook ──────────────────────────────────────────────────
 export function useSharedState<T>(key: string, defaultValue: T): [T, (val: T | ((prev: T) => T)) => void] {
   const [value, setValue] = useState<T>(() => readStorage(key, defaultValue))
 
   useEffect(() => {
-    const onMessage = (data: { key: string, value: any }) => {
-      if (data.key === key) {
-        setValue(data.value as T)
-        try {
-          localStorage.setItem(key, JSON.stringify(data.value))
-        } catch {}
-      }
+    const onUpdate = (newVal: any) => {
+      setValue(newVal as T)
     }
-    subscribers.add(onMessage)
-    
-    // Also listen to local storage changes for same-device cross-tab sync
+
+    if (!listeners.has(key)) {
+      listeners.set(key, new Set())
+    }
+    listeners.get(key)!.add(onUpdate)
+
+    // Also listen for localStorage changes (same-device cross-tab fallback)
     const onStorage = (e: StorageEvent) => {
       if (e.key === key && e.newValue !== null) {
         try {
-          setValue(JSON.parse(e.newValue) as T)
+          const parsed = JSON.parse(e.newValue) as T
+          setValue(parsed)
         } catch {}
       }
     }
     window.addEventListener('storage', onStorage)
 
     return () => {
-      subscribers.delete(onMessage)
+      listeners.get(key)?.delete(onUpdate)
       window.removeEventListener('storage', onStorage)
     }
   }, [key])
@@ -95,16 +269,19 @@ export function useSharedState<T>(key: string, defaultValue: T): [T, (val: T | (
   const setSharedValue = useCallback((val: T | ((prev: T) => T)) => {
     setValue((prev) => {
       const newValue = typeof val === 'function' ? (val as (prev: T) => T)(prev) : val
-      
+
+      // Update shared state
+      sharedState[key] = newValue
+
       // Persist locally
-      try {
-        localStorage.setItem(key, JSON.stringify(newValue))
-      } catch {}
-      
-      // Publish to cloud with retain:true so new connecting clients get the latest state immediately
-      if (mqttClient && mqttClient.connected) {
-        mqttClient.publish(`${TOPIC_BASE}/${key}`, JSON.stringify(newValue), { retain: true })
-      }
+      try { localStorage.setItem(key, JSON.stringify(newValue)) } catch {}
+
+      // Broadcast to same-device tabs
+      try { broadcastChannel?.postMessage({ key, value: newValue }) } catch {}
+
+      // Publish to remote devices via WebSocket
+      publishState(key, newValue)
+
       return newValue
     })
   }, [key])

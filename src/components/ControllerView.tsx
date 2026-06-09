@@ -17,7 +17,10 @@ const sceneLabels: Record<SceneType, string> = {
   'ending': 'VÉGE'
 }
 
+import { useConnectionStatus } from '@/hooks/useSharedState'
+
 export function ControllerView() {
+  const syncStatus = useConnectionStatus()
   const [currentScene, setCurrentScene] = useSharedState<SceneType>('obs-current-scene', 'live')
   const [previousScene, setPreviousScene] = useState<SceneType | null>(null)
   const [customMessage, setCustomMessage] = useSharedState<string>('obs-custom-message', '')
@@ -90,18 +93,41 @@ export function ControllerView() {
           </Button>
         </div>
 
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <DeviceTabletCamera size={24} className="text-primary" />
-            <div>
-              <p className="font-semibold text-sm">Tablet Vezérlő (Távoli Hozzáférés)</p>
-              <p className="text-xs text-muted-foreground mt-1 break-all">{remoteUrl}</p>
+        <div className={`rounded-lg p-4 flex flex-col gap-3 border ${
+          syncStatus === 'connected' ? 'bg-green-500/10 border-green-500/30' : 
+          syncStatus === 'connecting' ? 'bg-yellow-500/10 border-yellow-500/30' : 
+          'bg-red-500/10 border-red-500/30'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <DeviceTabletCamera size={24} className={
+                syncStatus === 'connected' ? 'text-green-400' : 
+                syncStatus === 'connecting' ? 'text-yellow-400' : 'text-red-400'
+              } />
+              <div>
+                <p className="font-semibold text-sm flex items-center gap-2">
+                  Távoli Vezérlés
+                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                    syncStatus === 'connected' ? 'bg-green-500/20 text-green-400' : 
+                    syncStatus === 'connecting' ? 'bg-yellow-500/20 text-yellow-400' : 
+                    'bg-red-500/20 text-red-400'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      syncStatus === 'connected' ? 'bg-green-400 animate-pulse' : 
+                      syncStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' : 'bg-red-400'
+                    }`} />
+                    {syncStatus === 'connected' ? 'Kapcsolódva' : syncStatus === 'connecting' ? 'Csatlakozás...' : 'Nincs kapcsolat'}
+                  </span>
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">Szoba: <code className="bg-white/10 px-1 rounded">{ROOM_ID}</code></p>
+              </div>
             </div>
+            <Button variant="default" size="sm" onClick={handleCopyRemoteUrl} className="whitespace-nowrap">
+              <Copy size={16} className="mr-2" />
+              Link Másolása
+            </Button>
           </div>
-          <Button variant="default" size="sm" onClick={handleCopyRemoteUrl} className="whitespace-nowrap">
-            <Copy size={16} className="mr-2" />
-            Link Másolása
-          </Button>
+          <p className="text-xs text-muted-foreground break-all">{remoteUrl}</p>
         </div>
 
         <ControlPanel
