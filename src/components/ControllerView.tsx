@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { useSharedState } from '@/hooks/useSharedState'
+import { useSharedState, ROOM_ID } from '@/hooks/useSharedState'
 import { ControlPanel } from '@/components/ControlPanel'
 import { HotkeyDialog } from '@/components/HotkeyDialog'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { useHotkeys } from '@/hooks/use-hotkeys'
+import { Button } from '@/components/ui/button'
+import { Radio, Keyboard, Copy, DeviceTabletCamera } from '@phosphor-icons/react'
 import type { SceneType, ThemeType, IndicatorType } from '@/components/StreamOverlay'
 
 const sceneLabels: Record<SceneType, string> = {
@@ -14,8 +16,6 @@ const sceneLabels: Record<SceneType, string> = {
   'coffee-break': 'KÁVÉSZÜNET',
   'ending': 'VÉGE'
 }
-import { ROOM_ID } from '@/hooks/useSharedState'
-import { Copy, DeviceTabletCamera } from '@phosphor-icons/react'
 
 export function ControllerView() {
   const [currentScene, setCurrentScene] = useSharedState<SceneType>('obs-current-scene', 'live')
