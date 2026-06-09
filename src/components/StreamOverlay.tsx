@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import oeLogo from '@/assets/images/oe-logo.svg'
 import oeLogoColor from '@/assets/images/oe-logo-color.svg'
 import { FloatingOE } from './FloatingOE'
@@ -202,16 +203,25 @@ export function StreamOverlay({
       </div>
 
       {/* Lower Third */}
-      <div className={`overlay-lower-third ${activeLowerThird ? 'is-visible' : ''}`}>
+      <AnimatePresence mode="wait">
         {activeLowerThird && (
-          <div className="overlay-lower-third-content">
-            <div className="overlay-lower-third-name">{activeLowerThird.name}</div>
-            {activeLowerThird.title && (
-              <div className="overlay-lower-third-title">{activeLowerThird.title}</div>
-            )}
-          </div>
+          <motion.div 
+            key={activeLowerThird.id}
+            className="overlay-lower-third"
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
+          >
+            <div className="overlay-lower-third-content">
+              <div className="overlay-lower-third-name">{activeLowerThird.name}</div>
+              {activeLowerThird.title && (
+                <div className="overlay-lower-third-title">{activeLowerThird.title}</div>
+              )}
+            </div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   )
 }
