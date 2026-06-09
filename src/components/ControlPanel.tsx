@@ -293,15 +293,19 @@ export function ControlPanel({
             {/* Add new */}
             <div className="grid gap-2 p-4 border border-border rounded-lg bg-black/5">
               <Label>Új hozzáadása</Label>
-              <Input 
-                placeholder="Név (pl. Kovács Péter)" 
+              <Textarea 
+                placeholder="Név (több sorba is írhatod)" 
                 value={newName} 
                 onChange={e => setNewName(e.target.value)}
+                rows={2}
+                className="resize-none"
               />
-              <Input 
+              <Textarea 
                 placeholder="Titulus (pl. Dékán)" 
                 value={newTitle} 
                 onChange={e => setNewTitle(e.target.value)}
+                rows={2}
+                className="resize-none"
               />
               <Button onClick={handleAddLowerThird} disabled={!newName.trim()}>
                 Hozzáadás
@@ -316,14 +320,14 @@ export function ControlPanel({
                   const isActive = activeLowerThird?.id === item.id
                   return (
                     <div key={item.id} className={cn(
-                      "flex items-center justify-between p-3 rounded-lg border",
+                      "flex items-center justify-between p-3 rounded-lg border gap-3",
                       isActive ? "border-primary bg-primary/10" : "border-border"
                     )}>
-                      <div>
-                        <div className="font-bold">{item.name}</div>
-                        <div className="text-sm text-muted-foreground">{item.title}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-bold break-words whitespace-pre-wrap">{item.name}</div>
+                        <div className="text-sm text-muted-foreground break-words whitespace-pre-wrap">{item.title}</div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 shrink-0">
                         <Button 
                           variant={isActive ? 'default' : 'secondary'}
                           size="sm"
