@@ -6,8 +6,9 @@ import { FloatingOE } from './FloatingOE'
 export type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending' | 'technical-issue'
 export type ThemeType = 'kek' | 'sotet' | 'vilagos'
 export type IndicatorType = 'dots' | 'bar' | 'pulse' | 'hologram' | 'morph'
-export type FacultyType = 'oe' | 'amk' | 'bgk' | 'kgk' | 'kvk' | 'nik' | 'rkk' | 'ybl'
-export type LogoAnimType = 'breathe' | 'spin3d' | 'bounce' | 'glitch' | 'swing'
+export type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending' | 'technical-issue'
+export type ThemeType = 'kek' | 'sotet' | 'vilagos'
+export type IndicatorType = 'dots' | 'bar' | 'pulse' | 'hologram' | 'morph'
 
 interface StreamOverlayProps {
   scene: SceneType
@@ -21,8 +22,7 @@ interface StreamOverlayProps {
   subtitle: string
   timerSeconds: number
   isTimerActive: boolean
-  faculty: FacultyType
-  logoAnim: LogoAnimType
+  isTimerActive: boolean
   floatingText: string
 }
 
@@ -142,20 +142,11 @@ export function StreamOverlay({
   subtitle,
   timerSeconds,
   isTimerActive,
-  faculty,
-  logoAnim,
   floatingText,
 }: StreamOverlayProps) {
   const isLive = scene === 'live'
   const themeVars = THEMES[theme] || THEMES.kek
-  
-  const logoUrl = () => {
-    if (faculty === 'oe') {
-      return theme === 'vilagos' ? oeLogoColor : oeLogo
-    }
-    const themeSuffix = theme === 'vilagos' ? '' : '_in'
-    return `/assets/images/faculties/${faculty.toUpperCase()}${themeSuffix}.png`
-  }
+  const isVilagos = theme === 'vilagos'
 
   const styleVars: Record<string, string> = { 
     ...themeVars, 
@@ -185,9 +176,9 @@ export function StreamOverlay({
         <div className="overlay-center">
           <div className="overlay-logo-container">
             <img 
-              src={logoUrl()} 
+              src={isVilagos ? oeLogoColor : oeLogo} 
               alt="Logo" 
-              className={`overlay-logo logo-anim-${logoAnim}`} 
+              className="overlay-logo" 
             />
           </div>
           <Headline text={headlineText} />

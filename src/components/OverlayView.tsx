@@ -16,8 +16,6 @@ export function OverlayView() {
   const [liveLabel] = useSharedState<string>('obs-live-label', 'Élő közvetítés')
   const [showClock] = useSharedState<boolean>('obs-show-clock', true)
   const [subtitle] = useSharedState<string>('obs-subtitle', '')
-  const [faculty] = useSharedState<any>('obs-faculty', 'oe')
-  const [logoAnim] = useSharedState<any>('obs-logo-anim', 'breathe')
   const [floatingText] = useSharedState<string>('obs-floating-text', 'OE')
 
   return (
@@ -34,8 +32,6 @@ export function OverlayView() {
         subtitle={subtitle || ''}
         timerSeconds={(timerMinutes || 5) * 60}
         isTimerActive={isTimerActive || false}
-        faculty={faculty || 'oe'}
-        logoAnim={logoAnim || 'breathe'}
         floatingText={floatingText || 'OE'}
       />
 
