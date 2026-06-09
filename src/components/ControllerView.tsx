@@ -14,6 +14,8 @@ const sceneLabels: Record<SceneType, string> = {
   'coffee-break': 'KÁVÉSZÜNET',
   'ending': 'VÉGE'
 }
+import { ROOM_ID } from '@/hooks/useSharedState'
+import { Copy, DeviceTabletCamera } from '@phosphor-icons/react'
 
 export function ControllerView() {
   const [currentScene, setCurrentScene] = useSharedState<SceneType>('obs-current-scene', 'live')
@@ -67,46 +69,80 @@ export function ControllerView() {
     { key: '?', handler: () => setIsHotkeyDialogOpen(true), description: 'Gyorsbillentyűk megjelenítése' },
   ])
 
+  const remoteUrl = `${window.location.origin}${window.location.pathname}?room=${ROOM_ID}#/controller`
+
+  const handleCopyRemoteUrl = () => {
+    navigator.clipboard.writeText(remoteUrl)
+    toast.success('Link másolva! Küldd el magadnak és nyisd meg a tableten!')
+  }
+
   return (
-    <>
-      <ControlPanel
-        currentScene={currentScene || 'live'}
-        onSceneChange={handleSceneChange}
-        customMessage={customMessage || ''}
-        onCustomMessageChange={setCustomMessage}
-        theme={theme || 'kek'}
-        onThemeChange={setTheme}
-        accentColor={accentColor || '#06DCDC'}
-        onAccentColorChange={setAccentColor}
-        indicator={indicator || 'dots'}
-        onIndicatorChange={setIndicator}
-        timerMinutes={timerMinutes || 5}
-        onTimerMinutesChange={setTimerMinutes}
-        isTimerActive={isTimerActive || false}
-        onTimerToggle={handleTimerToggle}
-        showLive={showLive !== false}
-        onShowLiveChange={setShowLive}
-        liveLabel={liveLabel || 'Élő közvetítés'}
-        onLiveLabelChange={setLiveLabel}
-        showClock={showClock !== false}
-        onShowClockChange={setShowClock}
-        subtitle={subtitle || ''}
-        onSubtitleChange={setSubtitle}
-        faculty={faculty}
-        onFacultyChange={setFaculty}
-        logoAnim={logoAnim}
-        onLogoAnimChange={setLogoAnim}
-        previousScene={previousScene}
-        onUndo={handleUndo}
-        onShowHotkeys={() => setIsHotkeyDialogOpen(true)}
-      />
+    <div className="min-h-screen bg-background text-foreground p-4 md:p-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Radio size={32} weight="bold" className="text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight">Stream Vezérlő</h1>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => setIsHotkeyDialogOpen(true)}>
+            <Keyboard size={16} className="mr-2" />
+            Gyorsbillentyűk
+          </Button>
+        </div>
 
-      <HotkeyDialog
-        open={isHotkeyDialogOpen}
-        onOpenChange={setIsHotkeyDialogOpen}
-      />
+        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <DeviceTabletCamera size={24} className="text-primary" />
+            <div>
+              <p className="font-semibold text-sm">Tablet Vezérlő (Távoli Hozzáférés)</p>
+              <p className="text-xs text-muted-foreground mt-1 break-all">{remoteUrl}</p>
+            </div>
+          </div>
+          <Button variant="default" size="sm" onClick={handleCopyRemoteUrl} className="whitespace-nowrap">
+            <Copy size={16} className="mr-2" />
+            Link Másolása
+          </Button>
+        </div>
 
-      <Toaster />
-    </>
+        <ControlPanel
+          currentScene={currentScene || 'live'}
+          onSceneChange={handleSceneChange}
+          customMessage={customMessage || ''}
+          onCustomMessageChange={setCustomMessage}
+          theme={theme || 'kek'}
+          onThemeChange={setTheme}
+          accentColor={accentColor || '#06DCDC'}
+          onAccentColorChange={setAccentColor}
+          indicator={indicator || 'dots'}
+          onIndicatorChange={setIndicator}
+          timerMinutes={timerMinutes || 5}
+          onTimerMinutesChange={setTimerMinutes}
+          isTimerActive={isTimerActive || false}
+          onTimerToggle={handleTimerToggle}
+          showLive={showLive !== false}
+          onShowLiveChange={setShowLive}
+          liveLabel={liveLabel || 'Élő közvetítés'}
+          onLiveLabelChange={setLiveLabel}
+          showClock={showClock !== false}
+          onShowClockChange={setShowClock}
+          subtitle={subtitle || ''}
+          onSubtitleChange={setSubtitle}
+          faculty={faculty}
+          onFacultyChange={setFaculty}
+          logoAnim={logoAnim}
+          onLogoAnimChange={setLogoAnim}
+          previousScene={previousScene}
+          onUndo={handleUndo}
+          onShowHotkeys={() => setIsHotkeyDialogOpen(true)}
+        />
+
+        <HotkeyDialog
+          open={isHotkeyDialogOpen}
+          onOpenChange={setIsHotkeyDialogOpen}
+        />
+
+        <Toaster />
+      </div>
+    </div>
   )
 }
