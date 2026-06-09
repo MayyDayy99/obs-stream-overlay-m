@@ -168,12 +168,12 @@
 }
 
 .overlay-lower-third-content {
-  background: var(--bg);
+  background: var(--lower-bg, var(--bg));
   border-left: 6px solid var(--accent);
   padding: clamp(16px, 2vh, 24px) clamp(24px, 3vw, 36px);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-radius: 0 12px 12px 0;
   min-width: 300px;
 }

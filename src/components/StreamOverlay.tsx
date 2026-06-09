@@ -48,9 +48,9 @@ const sceneSubtitles: Record<SceneType, string> = {
 }
 
 const THEMES = {
-  kek:     { '--bg': '#01298B', '--glow': '#1D4FD0', '--fg': '#ffffff', '--muted': 'rgba(255,255,255,.66)', '--line': 'rgba(255,255,255,.16)', '--vig': '.30' },
-  sotet:   { '--bg': '#070B18', '--glow': '#16306e', '--fg': '#ffffff', '--muted': 'rgba(255,255,255,.60)', '--line': 'rgba(255,255,255,.12)', '--vig': '.55' },
-  vilagos: { '--bg': '#EEF1F8', '--glow': '#9fb6ee', '--fg': '#01298B', '--muted': 'rgba(1,41,139,.60)', '--line': 'rgba(1,41,139,.16)', '--vig': '.05' },
+  kek:     { '--bg': '#01298B', '--glow': '#1D4FD0', '--fg': '#ffffff', '--muted': 'rgba(255,255,255,.66)', '--line': 'rgba(255,255,255,.16)', '--vig': '.30', '--lower-bg': 'rgba(0,18,66,0.85)' },
+  sotet:   { '--bg': '#070B18', '--glow': '#16306e', '--fg': '#ffffff', '--muted': 'rgba(255,255,255,.60)', '--line': 'rgba(255,255,255,.12)', '--vig': '.55', '--lower-bg': 'rgba(2,3,8,0.9)' },
+  vilagos: { '--bg': '#EEF1F8', '--glow': '#9fb6ee', '--fg': '#01298B', '--muted': 'rgba(1,41,139,.60)', '--line': 'rgba(1,41,139,.16)', '--vig': '.05', '--lower-bg': 'rgba(255,255,255,0.95)' },
 }
 
 function pad(n: number) { return String(n).padStart(2, '0') }
