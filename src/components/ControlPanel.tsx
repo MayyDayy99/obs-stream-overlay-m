@@ -49,6 +49,8 @@ interface ControlPanelProps {
   onFacultyChange: (faculty: FacultyType) => void
   logoAnim: LogoAnimType
   onLogoAnimChange: (anim: LogoAnimType) => void
+  floatingText: string
+  onFloatingTextChange: (text: string) => void
   previousScene: SceneType | null
   onUndo: () => void
   onShowHotkeys: () => void
@@ -130,6 +132,8 @@ export function ControlPanel({
   onFacultyChange,
   logoAnim,
   onLogoAnimChange,
+  floatingText,
+  onFloatingTextChange,
   previousScene,
   onUndo,
   onShowHotkeys
@@ -330,6 +334,29 @@ export function ControlPanel({
                   </Button>
                 ))}
               </div>
+            </div>
+
+            {/* Floating Text */}
+            <div className="pt-4 border-t border-border mt-2">
+              <Label className="block mb-2">Lebegő Szöveg (Háttér)</Label>
+              <div className="flex gap-2">
+                <Input 
+                  value={floatingText}
+                  onChange={(e) => onFloatingTextChange(e.target.value)}
+                  placeholder="Pl. OE, EDTI vagy 🚀"
+                  maxLength={15}
+                  className="flex-1"
+                />
+                <Button variant="outline" onClick={() => onFloatingTextChange('OE')}>
+                  OE
+                </Button>
+                <Button variant="outline" onClick={() => onFloatingTextChange('EDTI')}>
+                  EDTI
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Tipp: Rövid szövegnél nagy betűk, hosszúnál kisebbek jelennek meg. Emojit (Win + .) is használhatsz!
+              </p>
             </div>
             
             {/* Faculty & Logo Anim */}

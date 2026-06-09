@@ -35,6 +35,7 @@ export function ControllerView() {
   const [subtitle, setSubtitle] = useSharedState<string>('obs-subtitle', '')
   const [faculty, setFaculty] = useSharedState<any>('obs-faculty', 'oe')
   const [logoAnim, setLogoAnim] = useSharedState<any>('obs-logo-anim', 'breathe')
+  const [floatingText, setFloatingText] = useSharedState<string>('obs-floating-text', 'OE')
   const [isHotkeyDialogOpen, setIsHotkeyDialogOpen] = useState(false)
 
   const handleSceneChange = (newScene: SceneType) => {
@@ -157,6 +158,8 @@ export function ControllerView() {
           onFacultyChange={setFaculty}
           logoAnim={logoAnim}
           onLogoAnimChange={setLogoAnim}
+          floatingText={floatingText}
+          onFloatingTextChange={setFloatingText}
           previousScene={previousScene}
           onUndo={handleUndo}
           onShowHotkeys={() => setIsHotkeyDialogOpen(true)}

@@ -11,8 +11,28 @@ interface Particle {
   fontWeight: number
 }
 
-export function FloatingOE() {
+interface FloatingOEProps {
+  text?: string
+}
+
+// A szöveg hossza alapján dinamikusan skálázzuk a méretet
+function getScaleForText(text: string): { sizeMultiplier: number; count: number; speedMultiplier: number } {
+  const len = text.length
+  if (len <= 2) return { sizeMultiplier: 1.0, count: 45, speedMultiplier: 1.0 }       // OE
+  if (len <= 4) return { sizeMultiplier: 0.8, count: 40, speedMultiplier: 1.0 }       // EDTI
+  if (len <= 8) return { sizeMultiplier: 0.6, count: 30, speedMultiplier: 0.9 }       // Rövid szó
+  if (len <= 15) return { sizeMultiplier: 0.4, count: 22, speedMultiplier: 0.8 }      // Közepesen hosszú
+  return { sizeMultiplier: 0.28, count: 16, speedMultiplier: 0.7 }                    // Hosszú szöveg
+}
+
+export function FloatingOE({ text = 'OE' }: FloatingOEProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const textRef = useRef(text)
+
+  // Frissítsük a szöveget anélkül, hogy újra inicializálnánk a részecskéket
+  useEffect(() => {
+    textRef.current = text
+  }, [text])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -22,7 +42,7 @@ export function FloatingOE() {
 
     let animationFrameId: number
     const particles: Particle[] = []
-    const numParticles = 45 // Kicsit több
+    const { sizeMultiplier, count, speedMultiplier } = getScaleForText(text)
 
     const resize = () => {
       canvas.width = window.innerWidth
@@ -32,15 +52,16 @@ export function FloatingOE() {
     window.addEventListener('resize', resize)
 
     // Inicializálás
-    for (let i = 0; i < numParticles; i++) {
-      const radius = 25 + Math.random() * 40 // Kisebbek, 25-65 sugarúak (kb 50-130px font)
+    for (let i = 0; i < count; i++) {
+      const baseRadius = 25 + Math.random() * 40
+      const radius = baseRadius * sizeMultiplier
       particles.push({
         x: Math.random() * (canvas.width - radius * 2) + radius,
         y: Math.random() * (canvas.height - radius * 2) + radius,
-        vx: (Math.random() - 0.5) * 1.5, // Kicsit gyorsabb mozgás
-        vy: (Math.random() - 0.5) * 1.5,
+        vx: (Math.random() - 0.5) * 1.5 * speedMultiplier,
+        vy: (Math.random() - 0.5) * 1.5 * speedMultiplier,
         radius: radius,
-        opacity: 0.03 + Math.random() * 0.05, // 3-8%
+        opacity: 0.03 + Math.random() * 0.05,
         fontSize: radius * 1.8,
         fontWeight: Math.random() > 0.5 ? 700 : 800
       })
@@ -51,10 +72,10 @@ export function FloatingOE() {
       
       const themeData = document.querySelector('.overlay-scene')?.getAttribute('data-theme')
       const isVilagos = themeData === 'vilagos'
-      // A szöveg színe a témától függően legyen fekete vagy fehér, de nagyon átlátszó
       const baseColor = isVilagos ? '1, 41, 139' : '255, 255, 255'
 
-      // Frissítés és ütközésvizsgálat
+      const currentText = textRef.current
+
       for (let i = 0; i < particles.length; i++) {
         const p1 = particles[i]
         p1.x += p1.vx
@@ -74,13 +95,11 @@ export function FloatingOE() {
           const distance = Math.sqrt(dx * dx + dy * dy)
           
           if (distance < p1.radius + p2.radius) {
-            // Egyszerű rugalmas ütközés (massza a területtel arányos)
             const nx = dx / distance
             const ny = dy / distance
             const tx = -ny
             const ty = nx
 
-            // Sebességek pontszorzata a normál és érintő vektorokra
             const dpNorm1 = p1.vx * nx + p1.vy * ny
             const dpTan1 = p1.vx * tx + p1.vy * ty
             const dpNorm2 = p2.vx * nx + p2.vy * ny
@@ -89,17 +108,14 @@ export function FloatingOE() {
             const m1 = p1.radius * p1.radius
             const m2 = p2.radius * p2.radius
 
-            // 1D rugalmas ütközés a normálon
             const m1_norm = (dpNorm1 * (m1 - m2) + 2 * m2 * dpNorm2) / (m1 + m2)
             const m2_norm = (dpNorm2 * (m2 - m1) + 2 * m1 * dpNorm1) / (m1 + m2)
 
-            // Visszaalakítás x, y komponensekké
             p1.vx = tx * dpTan1 + nx * m1_norm
             p1.vy = ty * dpTan1 + ny * m1_norm
             p2.vx = tx * dpTan2 + nx * m2_norm
             p2.vy = ty * dpTan2 + ny * m2_norm
 
-            // Szétválasztás, nehogy beragadjanak egymásba
             const overlap = (p1.radius + p2.radius - distance) / 2
             p1.x -= overlap * nx
             p1.y -= overlap * ny
@@ -113,7 +129,7 @@ export function FloatingOE() {
         ctx.fillStyle = `rgba(${baseColor}, ${p1.opacity})`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
-        ctx.fillText("OE", p1.x, p1.y)
+        ctx.fillText(currentText, p1.x, p1.y)
       }
 
       animationFrameId = requestAnimationFrame(draw)
@@ -125,7 +141,7 @@ export function FloatingOE() {
       window.removeEventListener('resize', resize)
       cancelAnimationFrame(animationFrameId)
     }
-  }, [])
+  }, [text]) // Re-init particles when text changes (different sizing)
 
   return (
     <canvas

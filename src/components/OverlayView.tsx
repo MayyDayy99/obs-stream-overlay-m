@@ -18,6 +18,7 @@ export function OverlayView() {
   const [subtitle] = useSharedState<string>('obs-subtitle', '')
   const [faculty] = useSharedState<any>('obs-faculty', 'oe')
   const [logoAnim] = useSharedState<any>('obs-logo-anim', 'breathe')
+  const [floatingText] = useSharedState<string>('obs-floating-text', 'OE')
 
   return (
     <div className="relative w-full h-screen">
@@ -35,6 +36,7 @@ export function OverlayView() {
         isTimerActive={isTimerActive || false}
         faculty={faculty || 'oe'}
         logoAnim={logoAnim || 'breathe'}
+        floatingText={floatingText || 'OE'}
       />
 
       <Link 

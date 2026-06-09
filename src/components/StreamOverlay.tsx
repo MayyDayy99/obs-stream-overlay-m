@@ -23,6 +23,7 @@ interface StreamOverlayProps {
   isTimerActive: boolean
   faculty: FacultyType
   logoAnim: LogoAnimType
+  floatingText: string
 }
 
 const sceneMessages: Record<SceneType, string> = {
@@ -143,6 +144,7 @@ export function StreamOverlay({
   isTimerActive,
   faculty,
   logoAnim,
+  floatingText,
 }: StreamOverlayProps) {
   const isLive = scene === 'live'
   const themeVars = THEMES[theme] || THEMES.kek
@@ -168,7 +170,7 @@ export function StreamOverlay({
   return (
     <div className={`overlay-scene ${isLive ? 'is-live' : ''}`} data-theme={theme} style={styleVars as React.CSSProperties}>
       <div className="overlay-bg" style={{ opacity: isLive ? 0.6 : 1 }}>
-        <FloatingOE />
+        <FloatingOE text={floatingText || 'OE'} />
         <div className="overlay-noise" />
         <div className="overlay-orb a" />
         <div className="overlay-orb b" />
