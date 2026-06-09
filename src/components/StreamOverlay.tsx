@@ -6,9 +6,12 @@ import { FloatingOE } from './FloatingOE'
 export type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending' | 'technical-issue'
 export type ThemeType = 'kek' | 'sotet' | 'vilagos'
 export type IndicatorType = 'dots' | 'bar' | 'pulse' | 'hologram' | 'morph'
-export type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending' | 'technical-issue'
-export type ThemeType = 'kek' | 'sotet' | 'vilagos'
-export type IndicatorType = 'dots' | 'bar' | 'pulse' | 'hologram' | 'morph'
+
+export interface LowerThirdData {
+  id: string
+  name: string
+  title: string
+}
 
 interface StreamOverlayProps {
   scene: SceneType
@@ -22,8 +25,8 @@ interface StreamOverlayProps {
   subtitle: string
   timerSeconds: number
   isTimerActive: boolean
-  isTimerActive: boolean
   floatingText: string
+  activeLowerThird: LowerThirdData | null
 }
 
 const sceneMessages: Record<SceneType, string> = {
@@ -143,6 +146,7 @@ export function StreamOverlay({
   timerSeconds,
   isTimerActive,
   floatingText,
+  activeLowerThird,
 }: StreamOverlayProps) {
   const isLive = scene === 'live'
   const themeVars = THEMES[theme] || THEMES.kek
@@ -195,6 +199,18 @@ export function StreamOverlay({
           : <span />}
         <span className="spacer" />
         {showClock ? <Clock /> : <span />}
+      </div>
+
+      {/* Lower Third */}
+      <div className={`overlay-lower-third ${activeLowerThird ? 'is-visible' : ''}`}>
+        {activeLowerThird && (
+          <div className="overlay-lower-third-content">
+            <div className="overlay-lower-third-name">{activeLowerThird.name}</div>
+            {activeLowerThird.title && (
+              <div className="overlay-lower-third-title">{activeLowerThird.title}</div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

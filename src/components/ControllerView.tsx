@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { useHotkeys } from '@/hooks/use-hotkeys'
 import { Button } from '@/components/ui/button'
 import { Radio, Keyboard, Copy, DeviceTabletCamera } from '@phosphor-icons/react'
-import type { SceneType, ThemeType, IndicatorType } from '@/components/StreamOverlay'
+import type { SceneType, ThemeType, IndicatorType, LowerThirdData } from '@/components/StreamOverlay'
 
 const sceneLabels: Record<SceneType, string> = {
   'live': 'ÉLŐ',
@@ -34,6 +34,8 @@ export function ControllerView() {
   const [showClock, setShowClock] = useSharedState<boolean>('obs-show-clock', true)
   const [subtitle, setSubtitle] = useSharedState<string>('obs-subtitle', '')
   const [floatingText, setFloatingText] = useSharedState<string>('obs-floating-text', 'OE')
+  const [lowerThirdsList, setLowerThirdsList] = useSharedState<LowerThirdData[]>('obs-lower-thirds-list', [])
+  const [activeLowerThird, setActiveLowerThird] = useSharedState<LowerThirdData | null>('obs-lower-third-active', null)
   const [isHotkeyDialogOpen, setIsHotkeyDialogOpen] = useState(false)
 
   const handleSceneChange = (newScene: SceneType) => {
@@ -154,6 +156,10 @@ export function ControllerView() {
           onSubtitleChange={setSubtitle}
           floatingText={floatingText}
           onFloatingTextChange={setFloatingText}
+          lowerThirdsList={lowerThirdsList}
+          onLowerThirdsListChange={setLowerThirdsList}
+          activeLowerThird={activeLowerThird}
+          onActiveLowerThirdChange={setActiveLowerThird}
           previousScene={previousScene}
           onUndo={handleUndo}
           onShowHotkeys={() => setIsHotkeyDialogOpen(true)}

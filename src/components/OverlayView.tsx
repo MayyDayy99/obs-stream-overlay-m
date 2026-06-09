@@ -1,8 +1,7 @@
 import { useSharedState } from '@/hooks/useSharedState'
 import { StreamOverlay } from '@/components/StreamOverlay'
 import { Link } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import type { SceneType, ThemeType, IndicatorType } from '@/components/StreamOverlay'
+import type { SceneType, ThemeType, IndicatorType, LowerThirdData } from '@/components/StreamOverlay'
 
 export function OverlayView() {
   const [currentScene] = useSharedState<SceneType>('obs-current-scene', 'live')
@@ -17,6 +16,7 @@ export function OverlayView() {
   const [showClock] = useSharedState<boolean>('obs-show-clock', true)
   const [subtitle] = useSharedState<string>('obs-subtitle', '')
   const [floatingText] = useSharedState<string>('obs-floating-text', 'OE')
+  const [activeLowerThird] = useSharedState<LowerThirdData | null>('obs-lower-third-active', null)
 
   return (
     <div className="relative w-full h-screen">
@@ -33,6 +33,7 @@ export function OverlayView() {
         timerSeconds={(timerMinutes || 5) * 60}
         isTimerActive={isTimerActive || false}
         floatingText={floatingText || 'OE'}
+        activeLowerThird={activeLowerThird}
       />
 
       <Link 

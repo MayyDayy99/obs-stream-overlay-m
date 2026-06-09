@@ -148,40 +148,51 @@
 .logo-anim-spin3d {
   animation: logoSpin3D 6s linear infinite;
 }
-@keyframes logoSpin3D {
-  0% { transform: perspective(1000px) rotateY(0deg); }
-  100% { transform: perspective(1000px) rotateY(360deg); }
+/* Lower Thirds */
+.overlay-lower-third {
+  position: absolute;
+  left: clamp(28px, 4.4vw, 72px);
+  bottom: clamp(90px, 10vh, 120px);
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  transform: translateX(-40px);
+  pointer-events: none;
+  transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.logo-anim-bounce {
-  animation: logoBounce 2s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
-  transform-origin: bottom center;
-}
-@keyframes logoBounce {
-  0%, 100% { transform: translateY(0) scale(1, 1); }
-  40% { transform: translateY(-40px) scale(0.9, 1.1); }
-  50% { transform: translateY(0) scale(1.1, 0.9); }
-  60% { transform: translateY(-15px) scale(0.95, 1.05); }
-  70% { transform: translateY(0) scale(1.02, 0.98); }
+.overlay-lower-third.is-visible {
+  opacity: 1;
+  transform: translateX(0);
 }
 
-.logo-anim-glitch {
-  animation: logoGlitch 3s infinite;
-}
-@keyframes logoGlitch {
-  0%, 90%, 100% { transform: translate(0, 0) skew(0deg); filter: none; }
-  92% { transform: translate(-5px, 2px) skew(5deg); filter: drop-shadow(-3px 0 0 rgba(255,0,0,0.5)) drop-shadow(3px 0 0 rgba(0,255,255,0.5)); }
-  94% { transform: translate(5px, -2px) skew(-5deg); filter: drop-shadow(3px 0 0 rgba(255,0,0,0.5)) drop-shadow(-3px 0 0 rgba(0,255,255,0.5)); }
-  96% { transform: translate(0, 0) skew(0deg); filter: none; }
+.overlay-lower-third-content {
+  background: var(--bg);
+  border-left: 6px solid var(--accent);
+  padding: clamp(16px, 2vh, 24px) clamp(24px, 3vw, 36px);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 0 12px 12px 0;
+  min-width: 300px;
 }
 
-.logo-anim-swing {
-  animation: logoSwing 3s ease-in-out infinite alternate;
-  transform-origin: top center;
+.overlay-lower-third-name {
+  font-weight: 800;
+  font-size: clamp(28px, 3.5vw, 48px);
+  color: var(--fg);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
 }
-@keyframes logoSwing {
-  0% { transform: rotate(-15deg); }
-  100% { transform: rotate(15deg); }
+
+.overlay-lower-third-title {
+  font-weight: 500;
+  font-size: clamp(16px, 1.8vw, 24px);
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .overlay-headline {

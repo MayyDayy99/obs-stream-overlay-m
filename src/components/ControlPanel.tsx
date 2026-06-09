@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -20,7 +21,7 @@ import {
   Warning
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
-import type { SceneType, ThemeType, IndicatorType, FacultyType, LogoAnimType } from '@/components/StreamOverlay'
+import type { SceneType, ThemeType, IndicatorType, LowerThirdData } from '@/components/StreamOverlay'
 
 interface ControlPanelProps {
   currentScene: SceneType
@@ -45,12 +46,12 @@ interface ControlPanelProps {
   onShowClockChange: (v: boolean) => void
   subtitle: string
   onSubtitleChange: (subtitle: string) => void
-  faculty: FacultyType
-  onFacultyChange: (faculty: FacultyType) => void
-  logoAnim: LogoAnimType
-  onLogoAnimChange: (anim: LogoAnimType) => void
   floatingText: string
   onFloatingTextChange: (text: string) => void
+  lowerThirdsList: LowerThirdData[]
+  onLowerThirdsListChange: (list: LowerThirdData[] | ((prev: LowerThirdData[]) => LowerThirdData[])) => void
+  activeLowerThird: LowerThirdData | null
+  onActiveLowerThirdChange: (item: LowerThirdData | null) => void
   previousScene: SceneType | null
   onUndo: () => void
   onShowHotkeys: () => void
@@ -110,17 +111,38 @@ export function ControlPanel({
   onShowClockChange,
   subtitle,
   onSubtitleChange,
-  faculty,
-  onFacultyChange,
-  logoAnim,
-  onLogoAnimChange,
   floatingText,
   onFloatingTextChange,
+  lowerThirdsList,
+  onLowerThirdsListChange,
+  activeLowerThird,
+  onActiveLowerThirdChange,
   previousScene,
   onUndo,
   onShowHotkeys
 }: ControlPanelProps) {
   const overlayUrl = `${window.location.origin}${window.location.pathname}`
+  const [newName, setNewName] = useState('')
+  const [newTitle, setNewTitle] = useState('')
+
+  const handleAddLowerThird = () => {
+    if (!newName.trim()) return
+    const newItem: LowerThirdData = {
+      id: Math.random().toString(36).substring(2, 9),
+      name: newName.trim(),
+      title: newTitle.trim(),
+    }
+    onLowerThirdsListChange(prev => [...prev, newItem])
+    setNewName('')
+    setNewTitle('')
+  }
+
+  const handleRemoveLowerThird = (id: string) => {
+    onLowerThirdsListChange(prev => prev.filter(item => item.id !== id))
+    if (activeLowerThird?.id === id) {
+      onActiveLowerThirdChange(null)
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col gap-6 p-8">
@@ -257,6 +279,71 @@ export function ControlPanel({
             >
               Szövegek törlése
             </Button>
+          </div>
+        </Card>
+
+        {/* Lower Thirds */}
+        <Card className="p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <TextT size={24} weight="bold" />
+            <h2 className="text-xl font-bold">Előadók (Alsósáv)</h2>
+          </div>
+          
+          <div className="space-y-4">
+            {/* Add new */}
+            <div className="grid gap-2 p-4 border border-border rounded-lg bg-black/5">
+              <Label>Új hozzáadása</Label>
+              <Input 
+                placeholder="Név (pl. Kovács Péter)" 
+                value={newName} 
+                onChange={e => setNewName(e.target.value)}
+              />
+              <Input 
+                placeholder="Titulus (pl. Dékán)" 
+                value={newTitle} 
+                onChange={e => setNewTitle(e.target.value)}
+              />
+              <Button onClick={handleAddLowerThird} disabled={!newName.trim()}>
+                Hozzáadás
+              </Button>
+            </div>
+
+            {/* List */}
+            {lowerThirdsList.length > 0 && (
+              <div className="space-y-2 mt-4">
+                <Label>Mentett előadók</Label>
+                {lowerThirdsList.map(item => {
+                  const isActive = activeLowerThird?.id === item.id
+                  return (
+                    <div key={item.id} className={cn(
+                      "flex items-center justify-between p-3 rounded-lg border",
+                      isActive ? "border-primary bg-primary/10" : "border-border"
+                    )}>
+                      <div>
+                        <div className="font-bold">{item.name}</div>
+                        <div className="text-sm text-muted-foreground">{item.title}</div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant={isActive ? 'default' : 'secondary'}
+                          size="sm"
+                          onClick={() => onActiveLowerThirdChange(isActive ? null : item)}
+                        >
+                          {isActive ? 'Rejtés' : 'Mutat'}
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => handleRemoveLowerThird(item.id)}
+                        >
+                          X
+                        </Button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </Card>
 
