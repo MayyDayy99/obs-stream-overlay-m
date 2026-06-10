@@ -202,7 +202,7 @@ export function StreamOverlay({
 
   return (
     <div className={`overlay-scene ${isLive ? 'is-live' : ''}`} data-theme={theme} style={styleVars as React.CSSProperties}>
-      <div className="overlay-bg" style={{ opacity: isLive ? 0.6 : 1 }}>
+      <div className="overlay-bg" style={{ opacity: isLive ? 0 : 1, transition: 'opacity 0.6s ease' }}>
         <FloatingOE text={floatingText || 'OE'} />
         <div className="overlay-noise" />
         <div className="overlay-orb a" />
