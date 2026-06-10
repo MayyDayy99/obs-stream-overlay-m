@@ -23,6 +23,7 @@ import {
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import type { SceneType, ThemeType, IndicatorType, LowerThirdData, ScheduleItem, SocialMessage } from '@/components/StreamOverlay'
+import { ExcelManager } from '@/components/ExcelManager'
 
 interface ControlPanelProps {
   currentScene: SceneType
@@ -501,6 +502,12 @@ export function ControlPanel({
         <TabsContent value="prep" className="outline-none">
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-6">
+              <ExcelManager 
+                onLowerThirdsListChange={onLowerThirdsListChange}
+                onScheduleListChange={onScheduleListChange}
+                onSocialMessagesChange={onSocialMessagesChange}
+              />
+
               {/* OBS Connection Settings */}
               <Card className="p-6 border-l-4 border-l-orange-500">
                 <div className="mb-4 flex items-center justify-between">
