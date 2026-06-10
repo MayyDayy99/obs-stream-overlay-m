@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import {
   Play,
@@ -207,290 +208,333 @@ export function ControlPanel({
         </p>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Scenes */}
-        <Card className="p-6">
-          <h2 className="mb-4 text-xl font-bold">Jelenetek</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {sceneButtons.map((btn) => {
-              const Icon = btn.icon
-              const isActive = currentScene === btn.scene
+      <Tabs defaultValue="live" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-6 h-14">
+          <TabsTrigger value="live" className="text-lg font-bold">🔴 Élőzés</TabsTrigger>
+          <TabsTrigger value="prep" className="text-lg font-bold">⚙️ Előkészület</TabsTrigger>
+        </TabsList>
 
-              return (
-                <motion.div key={btn.scene} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    onClick={() => onSceneChange(btn.scene)}
-                    className={cn(
-                      "relative h-32 w-full flex-col gap-3 text-lg font-bold transition-all",
-                      isActive && "ring-4 ring-primary shadow-[0_0_20px_rgba(200,0,0,0.5)]"
-                    )}
-                    variant={isActive ? 'default' : 'outline'}
-                  >
-                    <Badge
-                      variant="secondary"
-                      className="absolute top-2 right-2 font-mono text-xs font-bold"
-                    >
-                      {btn.hotkey}
-                    </Badge>
-                    <Icon size={40} weight="bold" />
-                    {btn.label}
-                  </Button>
-                </motion.div>
-              )
-            })}
-          </div>
-        </Card>
+        <TabsContent value="live" className="outline-none">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-6">
+              {/* Scenes */}
+              <Card className="p-6">
+                <h2 className="mb-4 text-xl font-bold">Jelenetek</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  {sceneButtons.map((btn) => {
+                    const Icon = btn.icon
+                    const isActive = currentScene === btn.scene
 
-        {/* Custom Message + Subtitle */}
-        <Card className="p-6">
-          <div className="mb-4 flex items-center gap-2">
-            <TextT size={24} weight="bold" />
-            <h2 className="text-xl font-bold">Szövegek</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="custom-message">Egyedi főcím (felülírja a jelenet címét)</Label>
-              <Textarea
-                id="custom-message"
-                placeholder="Írd be az egyedi üzenetet..."
-                value={customMessage}
-                onChange={(e) => onCustomMessageChange(e.target.value)}
-                className="mt-2 min-h-[80px] text-base"
-              />
-              <p className="mt-1 text-sm text-muted-foreground">
-                {customMessage.length} karakter
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="subtitle">Alcím</Label>
-              <Input
-                id="subtitle"
-                placeholder="Egyedi alcím szöveg..."
-                value={subtitle}
-                onChange={(e) => onSubtitleChange(e.target.value)}
-                className="mt-2"
-              />
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => { onCustomMessageChange(''); onSubtitleChange(''); }}
-              disabled={!customMessage && !subtitle}
-              className="w-full"
-            >
-              Szövegek törlése
-            </Button>
-          </div>
-        </Card>
-
-        {/* Lower Thirds */}
-        <Card className="p-6">
-          <div className="mb-4 flex items-center gap-2">
-            <TextT size={24} weight="bold" />
-            <h2 className="text-xl font-bold">Előadók (Alsósáv)</h2>
-          </div>
-          
-          <div className="space-y-4">
-            {/* Add new */}
-            <div className="grid gap-2 p-4 border border-border rounded-lg bg-black/5">
-              <Label>Új hozzáadása</Label>
-              <Textarea 
-                placeholder="Név (több sorba is írhatod)" 
-                value={newName} 
-                onChange={e => setNewName(e.target.value)}
-                rows={2}
-                className="resize-none"
-              />
-              <Textarea 
-                placeholder="Titulus (pl. Dékán)" 
-                value={newTitle} 
-                onChange={e => setNewTitle(e.target.value)}
-                rows={2}
-                className="resize-none"
-              />
-              <Button onClick={handleAddLowerThird} disabled={!newName.trim()}>
-                Hozzáadás
-              </Button>
-            </div>
-
-            {/* List */}
-            {lowerThirdsList.length > 0 && (
-              <div className="space-y-2 mt-4">
-                <Label>Mentett előadók</Label>
-                {lowerThirdsList.map(item => {
-                  const isActive = activeLowerThird?.id === item.id
-                  return (
-                    <div key={item.id} className={cn(
-                      "flex items-center justify-between p-3 rounded-lg border gap-3",
-                      isActive ? "border-primary bg-primary/10" : "border-border"
-                    )}>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-bold break-words whitespace-pre-wrap">{item.name}</div>
-                        <div className="text-sm text-muted-foreground break-words whitespace-pre-wrap">{item.title}</div>
-                      </div>
-                      <div className="flex gap-2 shrink-0">
-                        <Button 
-                          variant={isActive ? 'default' : 'secondary'}
-                          size="sm"
-                          onClick={() => onActiveLowerThirdChange(isActive ? null : item)}
+                    return (
+                      <motion.div key={btn.scene} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button
+                          onClick={() => onSceneChange(btn.scene)}
+                          className={cn(
+                            "relative h-32 w-full flex-col gap-3 text-lg font-bold transition-all",
+                            isActive && "ring-4 ring-primary shadow-[0_0_20px_rgba(200,0,0,0.5)]"
+                          )}
+                          variant={isActive ? 'default' : 'outline'}
                         >
-                          {isActive ? 'Rejtés' : 'Mutat'}
+                          <Badge
+                            variant="secondary"
+                            className="absolute top-2 right-2 font-mono text-xs font-bold"
+                          >
+                            {btn.hotkey}
+                          </Badge>
+                          <Icon size={40} weight="bold" />
+                          {btn.label}
                         </Button>
-                        <Button 
-                          variant="destructive" 
-                          size="sm"
-                          onClick={() => handleRemoveLowerThird(item.id)}
-                        >
-                          X
-                        </Button>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </Card>
-
-        {/* Theme */}
-        <Card className="p-6">
-          <h2 className="mb-4 text-xl font-bold">Megjelenés</h2>
-          <div className="space-y-4">
-            <div>
-              <Label>Háttér téma</Label>
-              <div className="grid grid-cols-3 gap-3 mt-2">
-                {themeOptions.map((t) => (
-                  <Button
-                    key={t.id}
-                    variant={theme === t.id ? 'default' : 'outline'}
-                    onClick={() => onThemeChange(t.id)}
-                    className="h-16 flex-col gap-1"
-                  >
-                    <div
-                      className="w-8 h-8 rounded-full border border-white/20"
-                      style={{ background: t.preview }}
-                    />
-                    <span className="text-xs">{t.label}</span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <Label>Kiemelő szín</Label>
-              <div className="flex gap-3 mt-2">
-                {accentOptions.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => onAccentColorChange(color)}
-                    className={cn(
-                      "w-12 h-12 rounded-lg border-2 transition-all",
-                      accentColor === color
-                        ? "border-primary ring-2 ring-primary scale-110"
-                        : "border-white/20 hover:scale-105"
-                    )}
-                    style={{ background: color }}
-                    title={color}
-                  />
-                ))}
-              </div>
-            </div>
-            <div>
-              <Label>Jelző animáció</Label>
-              <div className="grid grid-cols-3 gap-3 mt-2">
-                {indicatorOptions.map((ind) => (
-                  <Button
-                    key={ind.id}
-                    variant={indicator === ind.id ? 'default' : 'outline'}
-                    onClick={() => onIndicatorChange(ind.id)}
-                    className="h-12"
-                  >
-                    {ind.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Floating Text */}
-            <div className="pt-4 border-t border-border mt-2">
-              <Label className="block mb-2">Lebegő Szöveg (Háttér)</Label>
-              <div className="flex gap-2">
-                <Input 
-                  value={floatingText}
-                  onChange={(e) => onFloatingTextChange(e.target.value)}
-                  placeholder="Pl. OE, EDTI vagy 🚀"
-                  maxLength={15}
-                  className="flex-1"
-                />
-                <Button variant="outline" onClick={() => onFloatingTextChange('OE')}>
-                  OE
-                </Button>
-                <Button variant="outline" onClick={() => onFloatingTextChange('EDTI')}>
-                  EDTI
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Tipp: Rövid szövegnél nagy betűk, hosszúnál kisebbek jelennek meg. Emojit (Win + .) is használhatsz!
-              </p>
-            </div>
-
-
-          </div>
-        </Card>
-
-        {/* Timer */}
-        <Card className="p-6">
-          <div className="mb-4 flex items-center gap-2">
-            <Clock size={24} weight="bold" />
-            <h2 className="text-xl font-bold">Időzítő</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="timer-minutes">Percek</Label>
-              <Input
-                id="timer-minutes"
-                type="number"
-                min="1"
-                max="120"
-                value={timerMinutes}
-                onChange={(e) => onTimerMinutesChange(parseInt(e.target.value) || 1)}
-                className="mt-2"
-              />
-            </div>
-            <Button
-              onClick={onTimerToggle}
-              variant={isTimerActive ? 'destructive' : 'default'}
-              className="w-full"
-              size="lg"
-            >
-              {isTimerActive ? 'Időzítő Leállítása' : 'Időzítő Indítása'}
-            </Button>
-          </div>
-
-          <div className="mt-6 pt-6 border-t border-border">
-            <h3 className="mb-4 text-lg font-bold">Lábléc beállítások</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="show-live">Élő jelzés</Label>
-                <Switch id="show-live" checked={showLive} onCheckedChange={onShowLiveChange} />
-              </div>
-              {showLive && (
-                <div>
-                  <Label htmlFor="live-label">Élő felirat</Label>
-                  <Input
-                    id="live-label"
-                    value={liveLabel}
-                    onChange={(e) => onLiveLabelChange(e.target.value)}
-                    className="mt-2"
-                  />
+                      </motion.div>
+                    )
+                  })}
                 </div>
-              )}
-              <div className="flex items-center justify-between">
-                <Label htmlFor="show-clock">Óra megjelenítése</Label>
-                <Switch id="show-clock" checked={showClock} onCheckedChange={onShowClockChange} />
-              </div>
+              </Card>
+              
+              {/* Floating Text LIVE */}
+              <Card className="p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <TextT size={24} weight="bold" />
+                  <h2 className="text-xl font-bold">Lebegő Szöveg (Háttér)</h2>
+                </div>
+                <div className="flex gap-2">
+                  <Input 
+                    value={floatingText}
+                    onChange={(e) => onFloatingTextChange(e.target.value)}
+                    placeholder="Pl. OE, EDTI vagy 🚀"
+                    maxLength={15}
+                    className="flex-1"
+                  />
+                  <Button variant="outline" onClick={() => onFloatingTextChange('OE')}>
+                    OE
+                  </Button>
+                  <Button variant="outline" onClick={() => onFloatingTextChange('EDTI')}>
+                    EDTI
+                  </Button>
+                </div>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
+              {/* Timer */}
+              <Card className="p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <Clock size={24} weight="bold" />
+                  <h2 className="text-xl font-bold">Időzítő</h2>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="timer-minutes">Percek</Label>
+                    <Input
+                      id="timer-minutes"
+                      type="number"
+                      min="1"
+                      max="120"
+                      value={timerMinutes}
+                      onChange={(e) => onTimerMinutesChange(parseInt(e.target.value) || 1)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <Button
+                    onClick={onTimerToggle}
+                    variant={isTimerActive ? 'destructive' : 'default'}
+                    className="w-full"
+                    size="lg"
+                  >
+                    {isTimerActive ? 'Időzítő Leállítása' : 'Időzítő Indítása'}
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Lower Thirds LIVE */}
+              <Card className="p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <TextT size={24} weight="bold" />
+                  <h2 className="text-xl font-bold">Előadók (Gyorsvezérlő)</h2>
+                </div>
+                <div className="space-y-4">
+                  {lowerThirdsList.length > 0 ? (
+                    <div className="space-y-2">
+                      {lowerThirdsList.map(item => {
+                        const isActive = activeLowerThird?.id === item.id
+                        return (
+                          <div key={item.id} className={cn(
+                            "flex items-center justify-between p-3 rounded-lg border gap-3 transition-colors",
+                            isActive ? "border-primary bg-primary/10" : "border-border"
+                          )}>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-bold break-words whitespace-pre-wrap">{item.name}</div>
+                              {item.title && <div className="text-sm text-muted-foreground break-words whitespace-pre-wrap">{item.title}</div>}
+                            </div>
+                            <div className="flex gap-2 shrink-0">
+                              <Button 
+                                variant={isActive ? 'default' : 'secondary'}
+                                size="lg"
+                                className="w-24 font-bold"
+                                onClick={() => onActiveLowerThirdChange(isActive ? null : item)}
+                              >
+                                {isActive ? 'Rejtés' : 'Mutat'}
+                              </Button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Nincsenek mentett előadók. Az Előkészület fülön tudsz hozzáadni.</p>
+                  )}
+                </div>
+              </Card>
             </div>
           </div>
-        </Card>
-      </div>
+        </TabsContent>
+
+        <TabsContent value="prep" className="outline-none">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-6">
+              {/* Custom Message + Subtitle */}
+              <Card className="p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <TextT size={24} weight="bold" />
+                  <h2 className="text-xl font-bold">Főcím / Alcím</h2>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="custom-message">Egyedi főcím (felülírja a jelenet címét)</Label>
+                    <Textarea
+                      id="custom-message"
+                      placeholder="Írd be az egyedi üzenetet..."
+                      value={customMessage}
+                      onChange={(e) => onCustomMessageChange(e.target.value)}
+                      className="mt-2 min-h-[80px] text-base"
+                    />
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {customMessage.length} karakter
+                    </p>
+                  </div>
+                  <div>
+                    <Label htmlFor="subtitle">Alcím</Label>
+                    <Input
+                      id="subtitle"
+                      placeholder="Egyedi alcím szöveg..."
+                      value={subtitle}
+                      onChange={(e) => onSubtitleChange(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => { onCustomMessageChange(''); onSubtitleChange(''); }}
+                    disabled={!customMessage && !subtitle}
+                    className="w-full"
+                  >
+                    Szövegek törlése
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Theme */}
+              <Card className="p-6">
+                <h2 className="mb-4 text-xl font-bold">Megjelenés (Téma & Színek)</h2>
+                <div className="space-y-4">
+                  <div>
+                    <Label>Háttér téma</Label>
+                    <div className="grid grid-cols-3 gap-3 mt-2">
+                      {themeOptions.map((t) => (
+                        <Button
+                          key={t.id}
+                          variant={theme === t.id ? 'default' : 'outline'}
+                          onClick={() => onThemeChange(t.id)}
+                          className="h-16 flex-col gap-1"
+                        >
+                          <div
+                            className="w-8 h-8 rounded-full border border-white/20"
+                            style={{ background: t.preview }}
+                          />
+                          <span className="text-xs">{t.label}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Kiemelő szín</Label>
+                    <div className="flex gap-3 mt-2">
+                      {accentOptions.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => onAccentColorChange(color)}
+                          className={cn(
+                            "w-12 h-12 rounded-lg border-2 transition-all",
+                            accentColor === color
+                              ? "border-primary ring-2 ring-primary scale-110"
+                              : "border-white/20 hover:scale-105"
+                          )}
+                          style={{ background: color }}
+                          title={color}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Jelző animáció</Label>
+                    <div className="grid grid-cols-3 gap-3 mt-2">
+                      {indicatorOptions.map((ind) => (
+                        <Button
+                          key={ind.id}
+                          variant={indicator === ind.id ? 'default' : 'outline'}
+                          onClick={() => onIndicatorChange(ind.id)}
+                          className="h-12"
+                        >
+                          {ind.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
+              {/* Lower Thirds PREP */}
+              <Card className="p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <TextT size={24} weight="bold" />
+                  <h2 className="text-xl font-bold">Alsósáv Szerkesztő</h2>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="grid gap-2 p-4 border border-border rounded-lg bg-black/5">
+                    <Label>Új hozzáadása</Label>
+                    <Textarea 
+                      placeholder="Név (több sorba is írhatod)" 
+                      value={newName} 
+                      onChange={e => setNewName(e.target.value)}
+                      rows={2}
+                      className="resize-none"
+                    />
+                    <Textarea 
+                      placeholder="Titulus (pl. Dékán)" 
+                      value={newTitle} 
+                      onChange={e => setNewTitle(e.target.value)}
+                      rows={2}
+                      className="resize-none"
+                    />
+                    <Button onClick={handleAddLowerThird} disabled={!newName.trim()}>
+                      Hozzáadás
+                    </Button>
+                  </div>
+
+                  {lowerThirdsList.length > 0 && (
+                    <div className="space-y-2 mt-4">
+                      <Label>Mentett előadók listája (Törlés)</Label>
+                      {lowerThirdsList.map(item => (
+                        <div key={item.id} className="flex items-center justify-between p-3 rounded-lg border border-border gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="font-bold break-words whitespace-pre-wrap">{item.name}</div>
+                            {item.title && <div className="text-sm text-muted-foreground break-words whitespace-pre-wrap">{item.title}</div>}
+                          </div>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => handleRemoveLowerThird(item.id)}
+                          >
+                            Törlés
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Card>
+
+              {/* Footer settings */}
+              <Card className="p-6">
+                <h3 className="mb-4 text-lg font-bold">Lábléc beállítások</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="show-live">Élő jelzés</Label>
+                    <Switch id="show-live" checked={showLive} onCheckedChange={onShowLiveChange} />
+                  </div>
+                  {showLive && (
+                    <div>
+                      <Label htmlFor="live-label">Élő felirat</Label>
+                      <Input
+                        id="live-label"
+                        value={liveLabel}
+                        onChange={(e) => onLiveLabelChange(e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="show-clock">Óra megjelenítése</Label>
+                    <Switch id="show-clock" checked={showClock} onCheckedChange={onShowClockChange} />
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <Card className="mt-auto p-6">
         <h3 className="mb-2 text-lg font-bold">Használati Útmutató</h3>
