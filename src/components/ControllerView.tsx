@@ -7,20 +7,23 @@ import { toast } from 'sonner'
 import { useHotkeys } from '@/hooks/use-hotkeys'
 import { Button } from '@/components/ui/button'
 import { Radio, Keyboard, Copy, DeviceTabletCamera } from '@phosphor-icons/react'
-import type { SceneType, ThemeType, IndicatorType, LowerThirdData } from '@/components/StreamOverlay'
+import type { SceneType, ThemeType, IndicatorType, LowerThirdData, ScheduleItem, SocialMessage } from '@/components/StreamOverlay'
 
 const sceneLabels: Record<SceneType, string> = {
   'live': 'ÉLŐ',
   'starting-soon': 'HAMAROSAN',
   'break': 'EBÉDSZÜNET',
   'coffee-break': 'KÁVÉSZÜNET',
-  'ending': 'VÉGE'
+  'ending': 'VÉGE',
+  'technical-issue': 'HIBA'
 }
 
 import { useConnectionStatus } from '@/hooks/useSharedState'
+import { useOBS } from '@/hooks/useOBS'
 
 export function ControllerView() {
   const syncStatus = useConnectionStatus()
+  const obsData = useOBS()
   const [currentScene, setCurrentScene] = useSharedState<SceneType>('obs-current-scene', 'live')
   const [previousScene, setPreviousScene] = useState<SceneType | null>(null)
   const [customMessage, setCustomMessage] = useSharedState<string>('obs-custom-message', '')
@@ -36,6 +39,16 @@ export function ControllerView() {
   const [floatingText, setFloatingText] = useSharedState<string>('obs-floating-text', 'OE')
   const [lowerThirdsList, setLowerThirdsList] = useSharedState<LowerThirdData[]>('obs-lower-thirds-list', [])
   const [activeLowerThird, setActiveLowerThird] = useSharedState<LowerThirdData | null>('obs-lower-third-active', null)
+  
+  const [scheduleList, setScheduleList] = useSharedState<ScheduleItem[]>('obs-schedule-list', [])
+  const [activeScheduleId, setActiveScheduleId] = useSharedState<string | null>('obs-schedule-active', null)
+  
+  const [socialMessages, setSocialMessages] = useSharedState<SocialMessage[]>('obs-social-msgs', [])
+  const [isSocialRotatorActive, setIsSocialRotatorActive] = useSharedState<boolean>('obs-social-active', false)
+  
+  const [bgmVolume, setBgmVolume] = useSharedState<number>('obs-bgm-volume', 30)
+  const [isBgmPlaying, setIsBgmPlaying] = useSharedState<boolean>('obs-bgm-playing', false)
+  
   const [isHotkeyDialogOpen, setIsHotkeyDialogOpen] = useState(false)
 
   const handleSceneChange = (newScene: SceneType) => {
@@ -43,12 +56,18 @@ export function ControllerView() {
       setPreviousScene(currentScene)
     }
     setCurrentScene(newScene)
+    
+    // Attempt to change OBS scene if connected. Map our SceneType to OBS Scene names if needed.
+    // Assuming OBS scenes are named exactly like sceneLabels, e.g. "ÉLŐ"
+    obsData.changeScene(sceneLabels[newScene])
+    
     toast.success(`Jelenet váltva: ${sceneLabels[newScene]}`)
   }
 
   const handleUndo = () => {
     if (previousScene) {
       setCurrentScene(previousScene)
+      obsData.changeScene(sceneLabels[previousScene])
       setPreviousScene(null)
       toast.info(`Visszaállítva: ${sceneLabels[previousScene]}`)
     }
@@ -163,6 +182,23 @@ export function ControllerView() {
           previousScene={previousScene}
           onUndo={handleUndo}
           onShowHotkeys={() => setIsHotkeyDialogOpen(true)}
+          
+          scheduleList={scheduleList}
+          onScheduleListChange={setScheduleList}
+          activeScheduleId={activeScheduleId}
+          onActiveScheduleIdChange={setActiveScheduleId}
+          
+          socialMessages={socialMessages}
+          onSocialMessagesChange={setSocialMessages}
+          isSocialRotatorActive={isSocialRotatorActive}
+          onSocialRotatorActiveChange={setIsSocialRotatorActive}
+          
+          bgmVolume={bgmVolume}
+          onBgmVolumeChange={setBgmVolume}
+          isBgmPlaying={isBgmPlaying}
+          onBgmPlayingChange={setIsBgmPlaying}
+          
+          obsData={obsData}
         />
 
         <HotkeyDialog

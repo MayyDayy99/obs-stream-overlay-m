@@ -1,7 +1,7 @@
 import { useSharedState } from '@/hooks/useSharedState'
 import { StreamOverlay } from '@/components/StreamOverlay'
 import { Link } from 'react-router-dom'
-import type { SceneType, ThemeType, IndicatorType, LowerThirdData } from '@/components/StreamOverlay'
+import type { SceneType, ThemeType, IndicatorType, LowerThirdData, ScheduleItem, SocialMessage } from '@/components/StreamOverlay'
 
 export function OverlayView() {
   const [currentScene] = useSharedState<SceneType>('obs-current-scene', 'live')
@@ -17,6 +17,15 @@ export function OverlayView() {
   const [subtitle] = useSharedState<string>('obs-subtitle', '')
   const [floatingText] = useSharedState<string>('obs-floating-text', 'OE')
   const [activeLowerThird] = useSharedState<LowerThirdData | null>('obs-lower-third-active', null)
+
+  const [scheduleList] = useSharedState<ScheduleItem[]>('obs-schedule-list', [])
+  const [activeScheduleId] = useSharedState<string | null>('obs-schedule-active', null)
+  
+  const [socialMessages] = useSharedState<SocialMessage[]>('obs-social-msgs', [])
+  const [isSocialRotatorActive] = useSharedState<boolean>('obs-social-active', false)
+  
+  const [bgmVolume] = useSharedState<number>('obs-bgm-volume', 30)
+  const [isBgmPlaying] = useSharedState<boolean>('obs-bgm-playing', false)
 
   return (
     <div className="relative w-full h-screen">
@@ -34,10 +43,18 @@ export function OverlayView() {
         isTimerActive={isTimerActive || false}
         floatingText={floatingText || 'OE'}
         activeLowerThird={activeLowerThird}
+        scheduleList={scheduleList}
+        activeScheduleId={activeScheduleId}
+        socialMessages={socialMessages}
+        isSocialRotatorActive={isSocialRotatorActive}
+        bgmVolume={bgmVolume}
+        isBgmPlaying={isBgmPlaying}
       />
 
       <Link 
         to="/controller" 
+        target="_blank"
+        rel="noopener noreferrer"
         className="fixed top-0 right-0 w-24 h-24 z-[60] opacity-0 cursor-pointer"
         title="Vezérlő"
       />

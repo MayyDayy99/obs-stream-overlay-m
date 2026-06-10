@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import oeLogo from '@/assets/images/oe-logo.svg'
 import oeLogoColor from '@/assets/images/oe-logo-color.svg'
@@ -12,6 +12,18 @@ export interface LowerThirdData {
   id: string
   name: string
   title: string
+}
+
+export interface ScheduleItem {
+  id: string
+  time: string
+  title: string
+  speaker: string
+}
+
+export interface SocialMessage {
+  id: string
+  text: string
 }
 
 interface StreamOverlayProps {
@@ -28,6 +40,12 @@ interface StreamOverlayProps {
   isTimerActive: boolean
   floatingText: string
   activeLowerThird: LowerThirdData | null
+  scheduleList: ScheduleItem[]
+  activeScheduleId: string | null
+  socialMessages: SocialMessage[]
+  isSocialRotatorActive: boolean
+  bgmVolume: number
+  isBgmPlaying: boolean
 }
 
 const sceneMessages: Record<SceneType, string> = {
@@ -148,10 +166,29 @@ export function StreamOverlay({
   isTimerActive,
   floatingText,
   activeLowerThird,
+  scheduleList = [],
+  activeScheduleId = null,
+  socialMessages = [],
+  isSocialRotatorActive = false,
+  bgmVolume = 50,
+  isBgmPlaying = false,
 }: StreamOverlayProps) {
   const isLive = scene === 'live'
   const themeVars = THEMES[theme] || THEMES.kek
   const isVilagos = theme === 'vilagos'
+
+  const audioRef = useRef<HTMLAudioElement>(null)
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = bgmVolume / 100
+      if (isBgmPlaying) {
+        audioRef.current.play().catch(e => console.error("Audio play blocked:", e))
+      } else {
+        audioRef.current.pause()
+      }
+    }
+  }, [isBgmPlaying, bgmVolume])
 
   const styleVars: Record<string, string> = { 
     ...themeVars, 
@@ -222,6 +259,86 @@ export function StreamOverlay({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Up Next / Schedule */}
+      <AnimatePresence mode="wait">
+        {activeScheduleId && (
+          <motion.div
+            key={activeScheduleId}
+            className="overlay-schedule"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+          >
+            {(() => {
+              const item = scheduleList.find(s => s.id === activeScheduleId)
+              if (!item) return null
+              return (
+                <div className="overlay-schedule-content">
+                  <div className="overlay-schedule-label">KÖVETKEZŐ</div>
+                  <div className="overlay-schedule-time">{item.time}</div>
+                  <div className="overlay-schedule-speaker">{item.speaker}</div>
+                  <div className="overlay-schedule-title">{item.title}</div>
+                </div>
+              )
+            })()}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Social Media Rotator */}
+      <AnimatePresence>
+        {isSocialRotatorActive && socialMessages.length > 0 && (
+          <SocialRotator messages={socialMessages} />
+        )}
+      </AnimatePresence>
+
+      {/* Audio Element */}
+      <audio 
+        ref={audioRef} 
+        src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" 
+        loop 
+        preload="auto" 
+      />
     </div>
+  )
+}
+
+function SocialRotator({ messages }: { messages: SocialMessage[] }) {
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    if (messages.length <= 1) return
+    const id = setInterval(() => {
+      setIndex(i => (i + 1) % messages.length)
+    }, 15000) // Rotate every 15s
+    return () => clearInterval(id)
+  }, [messages.length])
+
+  const msg = messages[index]
+  if (!msg) return null
+
+  return (
+    <motion.div
+      className="overlay-social"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      transition={{ duration: 0.5 }}
+    >
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={msg.id}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.5 }}
+          className="overlay-social-text"
+        >
+          {msg.text}
+        </motion.div>
+      </AnimatePresence>
+    </motion.div>
   )
 }

@@ -22,7 +22,7 @@ import {
   Warning
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
-import type { SceneType, ThemeType, IndicatorType, LowerThirdData } from '@/components/StreamOverlay'
+import type { SceneType, ThemeType, IndicatorType, LowerThirdData, ScheduleItem, SocialMessage } from '@/components/StreamOverlay'
 
 interface ControlPanelProps {
   currentScene: SceneType
@@ -56,6 +56,23 @@ interface ControlPanelProps {
   previousScene: SceneType | null
   onUndo: () => void
   onShowHotkeys: () => void
+  
+  scheduleList: ScheduleItem[]
+  onScheduleListChange: (list: ScheduleItem[] | ((prev: ScheduleItem[]) => ScheduleItem[])) => void
+  activeScheduleId: string | null
+  onActiveScheduleIdChange: (id: string | null) => void
+  
+  socialMessages: SocialMessage[]
+  onSocialMessagesChange: (list: SocialMessage[] | ((prev: SocialMessage[]) => SocialMessage[])) => void
+  isSocialRotatorActive: boolean
+  onSocialRotatorActiveChange: (v: boolean) => void
+  
+  bgmVolume: number
+  onBgmVolumeChange: (v: number) => void
+  isBgmPlaying: boolean
+  onBgmPlayingChange: (v: boolean) => void
+  
+  obsData: any
 }
 
 const sceneButtons: Array<{
@@ -120,11 +137,62 @@ export function ControlPanel({
   onActiveLowerThirdChange,
   previousScene,
   onUndo,
-  onShowHotkeys
+  onShowHotkeys,
+  scheduleList,
+  onScheduleListChange,
+  activeScheduleId,
+  onActiveScheduleIdChange,
+  socialMessages,
+  onSocialMessagesChange,
+  isSocialRotatorActive,
+  onSocialRotatorActiveChange,
+  bgmVolume,
+  onBgmVolumeChange,
+  isBgmPlaying,
+  onBgmPlayingChange,
+  obsData,
 }: ControlPanelProps) {
   const overlayUrl = `${window.location.origin}${window.location.pathname}`
   const [newName, setNewName] = useState('')
   const [newTitle, setNewTitle] = useState('')
+
+  const [newScheduleTime, setNewScheduleTime] = useState('')
+  const [newScheduleTitle, setNewScheduleTitle] = useState('')
+  const [newScheduleSpeaker, setNewScheduleSpeaker] = useState('')
+
+  const [newSocialMsg, setNewSocialMsg] = useState('')
+
+  const handleAddSchedule = () => {
+    if (!newScheduleTime.trim() || !newScheduleTitle.trim()) return
+    const newItem: ScheduleItem = {
+      id: Math.random().toString(36).substring(2, 9),
+      time: newScheduleTime.trim(),
+      title: newScheduleTitle.trim(),
+      speaker: newScheduleSpeaker.trim()
+    }
+    onScheduleListChange(prev => [...prev, newItem])
+    setNewScheduleTime('')
+    setNewScheduleTitle('')
+    setNewScheduleSpeaker('')
+  }
+  
+  const handleRemoveSchedule = (id: string) => {
+    onScheduleListChange(prev => prev.filter(item => item.id !== id))
+    if (activeScheduleId === id) onActiveScheduleIdChange(null)
+  }
+
+  const handleAddSocial = () => {
+    if (!newSocialMsg.trim()) return
+    const newItem: SocialMessage = {
+      id: Math.random().toString(36).substring(2, 9),
+      text: newSocialMsg.trim()
+    }
+    onSocialMessagesChange(prev => [...prev, newItem])
+    setNewSocialMsg('')
+  }
+  const handleRemoveSocial = (id: string) => {
+    onSocialMessagesChange(prev => prev.filter(item => item.id !== id))
+  }
 
   const handleAddLowerThird = () => {
     if (!newName.trim()) return
@@ -267,9 +335,52 @@ export function ControlPanel({
                   <Button variant="outline" onClick={() => onFloatingTextChange('OE')}>
                     OE
                   </Button>
-                  <Button variant="outline" onClick={() => onFloatingTextChange('EDTI')}>
-                    EDTI
+                </div>
+              </Card>
+
+              {/* Social Media Rotator LIVE */}
+              <Card className="p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <TextT size={24} weight="bold" />
+                    <h2 className="text-xl font-bold">Közösségi Rotátor</h2>
+                  </div>
+                  <Switch 
+                    checked={isSocialRotatorActive} 
+                    onCheckedChange={onSocialRotatorActiveChange} 
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {isSocialRotatorActive 
+                    ? "A rotátor aktív és váltogatja a megadott szövegeket." 
+                    : "A rotátor kikapcsolva."}
+                </p>
+              </Card>
+
+              {/* BGM LIVE */}
+              <Card className="p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <Play size={24} weight="bold" />
+                  <h2 className="text-xl font-bold">Háttérzene (Szünetekre)</h2>
+                </div>
+                <div className="space-y-4">
+                  <Button
+                    onClick={() => onBgmPlayingChange(!isBgmPlaying)}
+                    variant={isBgmPlaying ? 'destructive' : 'default'}
+                    className="w-full font-bold"
+                  >
+                    {isBgmPlaying ? '⏸️ Zene Leállítása' : '▶️ Zene Indítása'}
                   </Button>
+                  <div>
+                    <Label>Hangerő ({bgmVolume}%)</Label>
+                    <input 
+                      type="range" 
+                      min="0" max="100" 
+                      value={bgmVolume} 
+                      onChange={(e) => onBgmVolumeChange(parseInt(e.target.value))}
+                      className="w-full mt-2"
+                    />
+                  </div>
                 </div>
               </Card>
             </div>
@@ -302,6 +413,45 @@ export function ControlPanel({
                   >
                     {isTimerActive ? 'Időzítő Leállítása' : 'Időzítő Indítása'}
                   </Button>
+                </div>
+              </Card>
+
+              {/* Schedule LIVE */}
+              <Card className="p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <TextT size={24} weight="bold" />
+                  <h2 className="text-xl font-bold">Menetrend (Következő)</h2>
+                </div>
+                <div className="space-y-4">
+                  {scheduleList.length > 0 ? (
+                    <div className="space-y-2">
+                      {scheduleList.map(item => {
+                        const isActive = activeScheduleId === item.id
+                        return (
+                          <div key={item.id} className={cn(
+                            "flex items-center justify-between p-3 rounded-lg border gap-3 transition-colors",
+                            isActive ? "border-primary bg-primary/10" : "border-border"
+                          )}>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-bold whitespace-nowrap">{item.time}</div>
+                              <div className="text-sm font-semibold truncate">{item.speaker}</div>
+                              <div className="text-xs text-muted-foreground truncate">{item.title}</div>
+                            </div>
+                            <Button 
+                              variant={isActive ? 'default' : 'secondary'}
+                              size="sm"
+                              className="font-bold"
+                              onClick={() => onActiveScheduleIdChange(isActive ? null : item.id)}
+                            >
+                              {isActive ? 'Kinn van' : 'Mutat'}
+                            </Button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Nincs menetrend felvéve.</p>
+                  )}
                 </div>
               </Card>
 
@@ -351,6 +501,50 @@ export function ControlPanel({
         <TabsContent value="prep" className="outline-none">
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-6">
+              {/* OBS Connection Settings */}
+              <Card className="p-6 border-l-4 border-l-orange-500">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Broadcast size={24} weight="bold" />
+                    <h2 className="text-xl font-bold">OBS WebSocket Kapcsolat</h2>
+                  </div>
+                  <Badge variant={obsData?.isConnected ? "default" : "destructive"}>
+                    {obsData?.isConnected ? "Kapcsolódva" : "Nincs kapcsolat"}
+                  </Badge>
+                </div>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label>IP Cím és Port</Label>
+                      <Input 
+                        value={obsData?.obsUrl} 
+                        onChange={e => obsData?.setObsUrl(e.target.value)} 
+                        placeholder="ws://localhost:4455"
+                      />
+                    </div>
+                    <div>
+                      <Label>Jelszó</Label>
+                      <Input 
+                        type="password"
+                        value={obsData?.obsPassword} 
+                        onChange={e => obsData?.setObsPassword(e.target.value)} 
+                        placeholder="OBS jelszó"
+                      />
+                    </div>
+                  </div>
+                  <Button 
+                    variant={obsData?.isConnected ? "outline" : "default"} 
+                    className="w-full"
+                    onClick={() => obsData?.isConnected ? obsData?.disconnect() : obsData?.connect()}
+                  >
+                    {obsData?.isConnected ? "Lecsatlakozás" : "Csatlakozás"}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    A gombok (ÉLŐ, HAMAROSAN, stb.) automatikusan váltják az OBS jeleneteket, ha csatlakozva vagy!
+                  </p>
+                </div>
+              </Card>
+
               {/* Custom Message + Subtitle */}
               <Card className="p-6">
                 <div className="mb-4 flex items-center gap-2">
@@ -451,9 +645,101 @@ export function ControlPanel({
                   </div>
                 </div>
               </Card>
+
+              {/* Social Rotator PREP */}
+              <Card className="p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <TextT size={24} weight="bold" />
+                  <h2 className="text-xl font-bold">Közösségi Rotátor Szövegek</h2>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <Input 
+                      placeholder="Pl. Kövess minket: @obudai_egyetem" 
+                      value={newSocialMsg}
+                      onChange={e => setNewSocialMsg(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleAddSocial()}
+                    />
+                    <Button onClick={handleAddSocial} disabled={!newSocialMsg.trim()}>
+                      Hozzáadás
+                    </Button>
+                  </div>
+                  {socialMessages.length > 0 && (
+                    <div className="space-y-2 mt-4">
+                      {socialMessages.map(msg => (
+                        <div key={msg.id} className="flex items-center justify-between p-2 rounded border gap-3">
+                          <span className="font-semibold">{msg.text}</span>
+                          <Button variant="destructive" size="sm" onClick={() => handleRemoveSocial(msg.id)}>
+                            X
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Card>
             </div>
 
             <div className="space-y-6">
+              {/* Schedule PREP */}
+              <Card className="p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <TextT size={24} weight="bold" />
+                  <h2 className="text-xl font-bold">Menetrend Szerkesztő</h2>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="grid gap-2 p-4 border border-border rounded-lg bg-black/5">
+                    <Label>Új hozzáadása</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Input 
+                        placeholder="Időpont (pl. 14:00)" 
+                        value={newScheduleTime} 
+                        onChange={e => setNewScheduleTime(e.target.value)}
+                        className="col-span-1"
+                      />
+                      <Input 
+                        placeholder="Előadó neve" 
+                        value={newScheduleSpeaker} 
+                        onChange={e => setNewScheduleSpeaker(e.target.value)}
+                        className="col-span-2"
+                      />
+                    </div>
+                    <Input 
+                      placeholder="Előadás címe" 
+                      value={newScheduleTitle} 
+                      onChange={e => setNewScheduleTitle(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleAddSchedule()}
+                    />
+                    <Button onClick={handleAddSchedule} disabled={!newScheduleTime.trim() || !newScheduleTitle.trim()}>
+                      Hozzáadás
+                    </Button>
+                  </div>
+
+                  {scheduleList.length > 0 && (
+                    <div className="space-y-2 mt-4">
+                      <Label>Mentett programpontok (Törlés)</Label>
+                      {scheduleList.map(item => (
+                        <div key={item.id} className="flex items-center justify-between p-3 rounded-lg border border-border gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="font-bold whitespace-nowrap">{item.time}</div>
+                            <div className="text-sm font-semibold truncate">{item.speaker}</div>
+                            <div className="text-xs text-muted-foreground truncate">{item.title}</div>
+                          </div>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => handleRemoveSchedule(item.id)}
+                          >
+                            Törlés
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Card>
+
               {/* Lower Thirds PREP */}
               <Card className="p-6">
                 <div className="mb-4 flex items-center gap-2">

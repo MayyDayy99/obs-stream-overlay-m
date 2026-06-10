@@ -148,6 +148,75 @@
 .logo-anim-spin3d {
   animation: logoSpin3D 6s linear infinite;
 }
+
+/* Schedule & Social */
+.overlay-schedule {
+  position: absolute;
+  top: clamp(28px, 4.4vw, 72px);
+  right: clamp(28px, 4.4vw, 72px);
+  z-index: 10;
+}
+
+.overlay-schedule-content {
+  background: var(--lower-bg, var(--bg));
+  border-right: 4px solid var(--accent);
+  padding: 16px 24px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 12px 0 0 12px;
+  min-width: 250px;
+  text-align: right;
+}
+
+.overlay-schedule-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.overlay-schedule-time {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--fg);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.overlay-schedule-speaker {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.overlay-schedule-title {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.overlay-social {
+  position: absolute;
+  top: clamp(28px, 4.4vw, 72px);
+  left: clamp(28px, 4.4vw, 72px);
+  z-index: 10;
+  background: var(--lower-bg, var(--bg));
+  padding: 12px 24px;
+  border-radius: 30px;
+  border-left: 4px solid var(--accent);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+  backdrop-filter: blur(16px);
+}
+
+.overlay-social-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--fg);
+  white-space: nowrap;
+}
+
 /* Lower Thirds */
 .overlay-lower-third {
   position: absolute;
