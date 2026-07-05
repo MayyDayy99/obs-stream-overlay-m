@@ -117,7 +117,7 @@ export function ExcelManager({
   }
 
   return (
-    <Card className="p-6 border-l-4 border-l-green-600 bg-green-500/5">
+    <Card className="p-4 sm:p-6 border-l-4 border-l-green-600 bg-green-500/5">
       <div className="mb-4 flex items-center gap-2">
         <FileXls size={24} weight="bold" className="text-green-600" />
         <h2 className="text-xl font-bold">Tömeges Adatkezelés (Excel)</h2>
@@ -127,7 +127,7 @@ export function ExcelManager({
         Figyelem: az importálás <strong>felülírja</strong> az eddig felvett adatokat!
       </p>
       
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Button 
           variant="outline" 
           className="border-green-600/30 hover:bg-green-600/10 hover:text-green-600 font-bold"

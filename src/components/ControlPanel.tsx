@@ -215,14 +215,14 @@ export function ControlPanel({
   }
 
   return (
-    <div className="flex min-h-screen flex-col gap-6 p-8">
-      <div className="flex items-center justify-between">
+    <div className="flex min-h-screen flex-col gap-6 p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight text-primary">Óbudai Egyetem</h1>
-          <p className="text-xl text-muted-foreground">Stream Vezérlő</p>
+          <h1 className="text-2xl font-bold tracking-tight text-primary sm:text-4xl">Óbudai Egyetem</h1>
+          <p className="text-lg text-muted-foreground sm:text-xl">Stream Vezérlő</p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <Button
             variant="outline"
             size="sm"
@@ -255,15 +255,16 @@ export function ControlPanel({
         </div>
       </div>
 
-      <Card className="p-6 border-primary/30">
+      <Card className="p-4 sm:p-6 border-primary/30">
         <h3 className="mb-3 text-lg font-bold">OBS Browser Source URL</h3>
-        <div className="flex gap-3 items-center">
-          <code className="flex-1 rounded-md bg-secondary px-4 py-3 text-sm font-mono">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <code className="min-w-0 flex-1 overflow-x-auto rounded-md bg-secondary px-4 py-3 text-sm font-mono break-all">
             {overlayUrl}
           </code>
           <Button
             variant="outline"
             size="sm"
+            className="w-full sm:w-auto shrink-0"
             onClick={() => {
               navigator.clipboard.writeText(overlayUrl)
               toast.success('URL másolva a vágólapra')
@@ -278,16 +279,16 @@ export function ControlPanel({
       </Card>
 
       <Tabs defaultValue="live" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6 h-14">
-          <TabsTrigger value="live" className="text-lg font-bold">🔴 Élőzés</TabsTrigger>
-          <TabsTrigger value="prep" className="text-lg font-bold">⚙️ Előkészület</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mb-6 h-12 sm:h-14">
+          <TabsTrigger value="live" className="text-base font-bold sm:text-lg">🔴 Élőzés</TabsTrigger>
+          <TabsTrigger value="prep" className="text-base font-bold sm:text-lg">⚙️ Előkészület</TabsTrigger>
         </TabsList>
 
         <TabsContent value="live" className="outline-none">
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-6">
               {/* Scenes */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <h2 className="mb-4 text-xl font-bold">Jelenetek</h2>
                 <div className="grid grid-cols-2 gap-4">
                   {sceneButtons.map((btn) => {
@@ -299,7 +300,7 @@ export function ControlPanel({
                         <Button
                           onClick={() => onSceneChange(btn.scene)}
                           className={cn(
-                            "relative h-32 w-full flex-col gap-3 text-lg font-bold transition-all",
+                            "relative h-24 w-full flex-col gap-2 whitespace-normal px-2 text-center text-base font-bold transition-all sm:h-32 sm:gap-3 sm:text-lg",
                             isActive && "ring-4 ring-primary shadow-[0_0_20px_rgba(200,0,0,0.5)]"
                           )}
                           variant={isActive ? 'default' : 'outline'}
@@ -310,7 +311,8 @@ export function ControlPanel({
                           >
                             {btn.hotkey}
                           </Badge>
-                          <Icon size={40} weight="bold" />
+                          <Icon size={32} weight="bold" className="sm:hidden" />
+                          <Icon size={40} weight="bold" className="hidden sm:block" />
                           {btn.label}
                         </Button>
                       </motion.div>
@@ -320,7 +322,7 @@ export function ControlPanel({
               </Card>
               
               {/* Floating Text LIVE */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
                   <TextT size={24} weight="bold" />
                   <h2 className="text-xl font-bold">Lebegő Szöveg (Háttér)</h2>
@@ -340,7 +342,7 @@ export function ControlPanel({
               </Card>
 
               {/* Social Media Rotator LIVE */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <TextT size={24} weight="bold" />
@@ -359,7 +361,7 @@ export function ControlPanel({
               </Card>
 
               {/* BGM LIVE */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
                   <Play size={24} weight="bold" />
                   <h2 className="text-xl font-bold">Háttérzene (Szünetekre)</h2>
@@ -388,7 +390,7 @@ export function ControlPanel({
 
             <div className="space-y-6">
               {/* Timer */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
                   <Clock size={24} weight="bold" />
                   <h2 className="text-xl font-bold">Időzítő</h2>
@@ -418,7 +420,7 @@ export function ControlPanel({
               </Card>
 
               {/* Schedule LIVE */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
                   <TextT size={24} weight="bold" />
                   <h2 className="text-xl font-bold">Menetrend (Következő)</h2>
@@ -457,7 +459,7 @@ export function ControlPanel({
               </Card>
 
               {/* Lower Thirds LIVE */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
                   <TextT size={24} weight="bold" />
                   <h2 className="text-xl font-bold">Előadók (Gyorsvezérlő)</h2>
@@ -509,7 +511,7 @@ export function ControlPanel({
               />
 
               {/* OBS Connection Settings */}
-              <Card className="p-6 border-l-4 border-l-orange-500">
+              <Card className="p-4 sm:p-6 border-l-4 border-l-orange-500">
                 <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Broadcast size={24} weight="bold" />
@@ -520,7 +522,7 @@ export function ControlPanel({
                   </Badge>
                 </div>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <div>
                       <Label>IP Cím és Port</Label>
                       <Input 
@@ -553,7 +555,7 @@ export function ControlPanel({
               </Card>
 
               {/* Custom Message + Subtitle */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
                   <TextT size={24} weight="bold" />
                   <h2 className="text-xl font-bold">Főcím / Alcím</h2>
@@ -594,7 +596,7 @@ export function ControlPanel({
               </Card>
 
               {/* Theme */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <h2 className="mb-4 text-xl font-bold">Megjelenés (Téma & Színek)</h2>
                 <div className="space-y-4">
                   <div>
@@ -654,7 +656,7 @@ export function ControlPanel({
               </Card>
 
               {/* Social Rotator PREP */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
                   <TextT size={24} weight="bold" />
                   <h2 className="text-xl font-bold">Közösségi Rotátor Szövegek</h2>
@@ -689,7 +691,7 @@ export function ControlPanel({
 
             <div className="space-y-6">
               {/* Schedule PREP */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
                   <TextT size={24} weight="bold" />
                   <h2 className="text-xl font-bold">Menetrend Szerkesztő</h2>
@@ -698,18 +700,18 @@ export function ControlPanel({
                 <div className="space-y-4">
                   <div className="grid gap-2 p-4 border border-border rounded-lg bg-black/5">
                     <Label>Új hozzáadása</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <Input 
-                        placeholder="Időpont (pl. 14:00)" 
-                        value={newScheduleTime} 
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                      <Input
+                        placeholder="Időpont (pl. 14:00)"
+                        value={newScheduleTime}
                         onChange={e => setNewScheduleTime(e.target.value)}
-                        className="col-span-1"
+                        className="sm:col-span-1"
                       />
-                      <Input 
-                        placeholder="Előadó neve" 
-                        value={newScheduleSpeaker} 
+                      <Input
+                        placeholder="Előadó neve"
+                        value={newScheduleSpeaker}
                         onChange={e => setNewScheduleSpeaker(e.target.value)}
-                        className="col-span-2"
+                        className="sm:col-span-2"
                       />
                     </div>
                     <Input 
@@ -748,7 +750,7 @@ export function ControlPanel({
               </Card>
 
               {/* Lower Thirds PREP */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
                   <TextT size={24} weight="bold" />
                   <h2 className="text-xl font-bold">Alsósáv Szerkesztő</h2>
@@ -800,7 +802,7 @@ export function ControlPanel({
               </Card>
 
               {/* Footer settings */}
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <h3 className="mb-4 text-lg font-bold">Lábléc beállítások</h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
