@@ -118,10 +118,10 @@ export function ControllerView() {
           syncStatus === 'connecting' ? 'bg-yellow-500/10 border-yellow-500/30' : 
           'bg-red-500/10 border-red-500/30'
         }`}>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <DeviceTabletCamera size={24} className={
-                syncStatus === 'connected' ? 'text-green-400' : 
+                syncStatus === 'connected' ? 'text-green-400' :
                 syncStatus === 'connecting' ? 'text-yellow-400' : 'text-red-400'
               } />
               <div>
@@ -142,7 +142,7 @@ export function ControllerView() {
                 <p className="text-xs text-muted-foreground mt-1">Szoba: <code className="bg-white/10 px-1 rounded">{ROOM_ID}</code></p>
               </div>
             </div>
-            <Button variant="default" size="sm" onClick={handleCopyRemoteUrl} className="whitespace-nowrap">
+            <Button variant="default" size="sm" onClick={handleCopyRemoteUrl} className="w-full whitespace-nowrap sm:w-auto sm:shrink-0">
               <Copy size={16} className="mr-2" />
               Link Másolása
             </Button>
