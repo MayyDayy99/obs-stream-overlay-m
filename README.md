@@ -15,12 +15,12 @@ Professional OBS streaming overlay manager for Óbuda University broadcasts with
 
 ## 🚀 Quick Start
 
-1. **Setup OBS Browser Source**:
+1. **Setup OBS Browser Sources (Layers)**:
    - Navigate to `/controller` in your browser
-   - Copy the overlay URL from the top card
-   - Add a new Browser Source in OBS (1920x1080)
-   - Paste the overlay URL
-   - The overlay will display at the root path (`/`)
+   - The top card shows the layer URLs (each carries the shared `?room=` id)
+   - **Top layer (`#/l2`)** — add as a Browser Source (1920x1080) **above** your camera/content. Renders the break covers (Starting Soon, Break, …) and the live graphics (lower thirds, footer, schedule, social rotator).
+   - **Bottom layer (`#/l1`)** — add as a Browser Source (1920x1080) **below** your camera/content. Renders the branded animated background that sits behind a framed/non-fullscreen camera during Live.
+   - Prefer a single source? Use **`#/`**, which renders everything in one overlay placed above the camera.
 
 2. **Control Your Stream**:
    - Keep `/controller` open on a separate screen
@@ -34,6 +34,7 @@ Professional OBS streaming overlay manager for Óbuda University broadcasts with
 - `3` - EBÉDSZÜNET (Lunch Break)
 - `4` - KÁVÉSZÜNET (Coffee Break)
 - `5` - VÉGE (Ending)
+- `6` - TECHNIKAI SZÜNET (Technical Issue)
 - `T` - Toggle timer
 - `Ctrl+Z` - Undo scene change
 - `?` - Show hotkey reference

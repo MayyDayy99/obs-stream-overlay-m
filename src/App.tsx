@@ -7,6 +7,8 @@ function App() {
     <HashRouter>
       <Routes>
         <Route path="/" element={<OverlayView />} />
+        <Route path="/l1" element={<OverlayView layer="bottom" />} />
+        <Route path="/l2" element={<OverlayView layer="top" />} />
         <Route path="/controller" element={<ControllerView />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

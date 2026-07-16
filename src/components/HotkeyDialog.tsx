@@ -25,6 +25,7 @@ const hotkeys: HotkeyItem[] = [
   { keys: ['3'], description: 'EBÉDSZÜNET jelenet', category: 'Jelenetek' },
   { keys: ['4'], description: 'KÁVÉSZÜNET jelenet', category: 'Jelenetek' },
   { keys: ['5'], description: 'VÉGE jelenet', category: 'Jelenetek' },
+  { keys: ['6'], description: 'TECHNIKAI SZÜNET jelenet', category: 'Jelenetek' },
   { keys: ['T'], description: 'Időzítő indítása/leállítása', category: 'Időzítő' },
   { keys: ['Ctrl', 'Z'], description: 'Előző jelenet visszaállítása', category: 'Műveletek' },
   { keys: ['?'], description: 'Gyorsbillentyűk megjelenítése', category: 'Súgó' },

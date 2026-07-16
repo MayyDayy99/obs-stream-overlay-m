@@ -1,9 +1,9 @@
 import { useSharedState } from '@/hooks/useSharedState'
 import { StreamOverlay } from '@/components/StreamOverlay'
 import { Link } from 'react-router-dom'
-import type { SceneType, ThemeType, IndicatorType, LowerThirdData, ScheduleItem, SocialMessage } from '@/components/StreamOverlay'
+import type { SceneType, ThemeType, IndicatorType, LowerThirdData, ScheduleItem, SocialMessage, OverlayLayer } from '@/components/StreamOverlay'
 
-export function OverlayView() {
+export function OverlayView({ layer = 'all' }: { layer?: OverlayLayer }) {
   const [currentScene] = useSharedState<SceneType>('obs-current-scene', 'live')
   const [customMessage] = useSharedState<string>('obs-custom-message', '')
   const [theme] = useSharedState<ThemeType>('obs-theme', 'kek')
@@ -30,6 +30,7 @@ export function OverlayView() {
   return (
     <div className="relative w-full h-screen">
       <StreamOverlay
+        layer={layer}
         scene={currentScene || 'live'}
         customMessage={customMessage || ''}
         theme={theme || 'kek'}

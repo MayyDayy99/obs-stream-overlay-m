@@ -80,10 +80,10 @@ export function ExcelManager({
           const ws = wb.Sheets['Menetrend']
           const data = utils.sheet_to_json<any>(ws)
           const newList: ScheduleItem[] = data
-            .filter(row => row['Időpont'] && row['Cím'])
+            .filter(row => row['Cím'])
             .map(row => ({
               id: Math.random().toString(36).substring(2, 9),
-              time: String(row['Időpont']),
+              time: row['Időpont'] ? String(row['Időpont']) : '',
               speaker: row['Előadó'] ? String(row['Előadó']) : '',
               title: String(row['Cím'])
             }))

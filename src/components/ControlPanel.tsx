@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -24,6 +24,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { SceneType, ThemeType, IndicatorType, LowerThirdData, ScheduleItem, SocialMessage } from '@/components/StreamOverlay'
 import { ExcelManager } from '@/components/ExcelManager'
+import { ROOM_ID } from '@/hooks/useSharedState'
 
 interface ControlPanelProps {
   currentScene: SceneType
@@ -153,7 +154,10 @@ export function ControlPanel({
   onBgmPlayingChange,
   obsData,
 }: ControlPanelProps) {
-  const overlayUrl = `${window.location.origin}${window.location.pathname}`
+  const baseUrl = `${window.location.origin}${window.location.pathname}?room=${ROOM_ID}`
+  const overlayUrlAll = `${baseUrl}#/`
+  const overlayUrlBottom = `${baseUrl}#/l1`
+  const overlayUrlTop = `${baseUrl}#/l2`
   const [newName, setNewName] = useState('')
   const [newTitle, setNewTitle] = useState('')
 
@@ -163,8 +167,41 @@ export function ControlPanel({
 
   const [newSocialMsg, setNewSocialMsg] = useState('')
 
+  // Előadónkénti megjelenítési idő (mp). Alapból 5 mp. Csak vezérlő-oldali UI állapot.
+  const [durations, setDurations] = useState<Record<string, number>>({})
+  const getDuration = (id: string) => durations[id] ?? 5
+  // A "Mutat" utáni automatikus elrejtés időzítője
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => { if (hideTimerRef.current) clearTimeout(hideTimerRef.current) }
+  }, [])
+
+  const handleToggleLowerThird = (item: LowerThirdData) => {
+    // Előző automatikus elrejtés törlése
+    if (hideTimerRef.current) { clearTimeout(hideTimerRef.current); hideTimerRef.current = null }
+
+    const isActive = activeLowerThird?.id === item.id
+    if (isActive) {
+      // Kézi elrejtés
+      onActiveLowerThirdChange(null)
+      return
+    }
+
+    onActiveLowerThirdChange(item)
+
+    const secs = getDuration(item.id)
+    if (secs > 0) {
+      hideTimerRef.current = setTimeout(() => {
+        onActiveLowerThirdChange(null)
+        hideTimerRef.current = null
+      }, secs * 1000)
+    }
+  }
+
   const handleAddSchedule = () => {
-    if (!newScheduleTime.trim() || !newScheduleTitle.trim()) return
+    // Az időpont opcionális; csak a cím kötelező
+    if (!newScheduleTitle.trim()) return
     const newItem: ScheduleItem = {
       id: Math.random().toString(36).substring(2, 9),
       time: newScheduleTime.trim(),
@@ -176,10 +213,14 @@ export function ControlPanel({
     setNewScheduleTitle('')
     setNewScheduleSpeaker('')
   }
-  
+
   const handleRemoveSchedule = (id: string) => {
     onScheduleListChange(prev => prev.filter(item => item.id !== id))
     if (activeScheduleId === id) onActiveScheduleIdChange(null)
+  }
+
+  const handleUpdateSchedule = (id: string, patch: Partial<ScheduleItem>) => {
+    onScheduleListChange(prev => prev.map(item => item.id === id ? { ...item, ...patch } : item))
   }
 
   const handleAddSocial = () => {
@@ -256,25 +297,30 @@ export function ControlPanel({
       </div>
 
       <Card className="p-4 sm:p-6 border-primary/30">
-        <h3 className="mb-3 text-lg font-bold">OBS Browser Source URL</h3>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <code className="min-w-0 flex-1 overflow-x-auto rounded-md bg-secondary px-4 py-3 text-sm font-mono break-all">
-            {overlayUrl}
-          </code>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full sm:w-auto shrink-0"
-            onClick={() => {
-              navigator.clipboard.writeText(overlayUrl)
-              toast.success('URL másolva a vágólapra')
-            }}
-          >
-            Másolás
-          </Button>
+        <h3 className="mb-1 text-lg font-bold">OBS Browser Source URL-ek (Rétegek)</h3>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Két külön böngésző-forrás, közös szobával. Az OBS-ben a <strong>felső</strong> réteg a kamera <strong>fölé</strong>,
+          az <strong>alsó</strong> réteg a kamera <strong>alá</strong> kerüljön. Mindkettőt ez a vezérlő irányítja.
+        </p>
+        <div className="space-y-3">
+          <UrlRow
+            label="⬆️ Felső réteg — kamera FÖLÉ (Layer 2)"
+            url={overlayUrlTop}
+            hint="Szünet-fedések (HAMAROSAN, EBÉD, KÁVÉ, VÉGE, TECHNIKAI) és az élő feliratok: alsó sáv, lábléc, menetrend, közösségi rotátor."
+          />
+          <UrlRow
+            label="⬇️ Alsó réteg — kamera ALÁ (Layer 1)"
+            url={overlayUrlBottom}
+            hint="Az élő közvetítés márkázott, animált háttere a kamera mögött. Ha a kamerád kitölti a teljes képet, ez nem látszik."
+          />
+          <UrlRow
+            label="Egyszerű mód — egyetlen forrás (mindent mutat)"
+            url={overlayUrlAll}
+            hint="Ha nem akarsz két réteget: az eredeti overlay, ami mindent egyben mutat, a kamera fölé téve."
+          />
         </div>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Ajánlott felbontás: 1920x1080 | Add hozzá OBS-ben mint Browser Source
+        <p className="mt-3 text-sm text-muted-foreground">
+          Ajánlott felbontás: 1920x1080 | OBS → Browser Source
         </p>
       </Card>
 
@@ -299,6 +345,7 @@ export function ControlPanel({
                       <motion.div key={btn.scene} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={() => onSceneChange(btn.scene)}
+                          title={isActive && btn.scene !== 'live' ? 'Kattints újra a kikapcsoláshoz (vissza élőre)' : undefined}
                           className={cn(
                             "relative h-24 w-full flex-col gap-2 whitespace-normal px-2 text-center text-base font-bold transition-all sm:h-32 sm:gap-3 sm:text-lg",
                             isActive && "ring-4 ring-primary shadow-[0_0_20px_rgba(200,0,0,0.5)]"
@@ -319,8 +366,11 @@ export function ControlPanel({
                     )
                   })}
                 </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  A szünet-jelenetek (2–6) kapcsolóként működnek: kattints ugyanarra újra a kikapcsoláshoz (vissza élőre).
+                </p>
               </Card>
-              
+
               {/* Floating Text LIVE */}
               <Card className="p-4 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
@@ -436,7 +486,7 @@ export function ControlPanel({
                             isActive ? "border-primary bg-primary/10" : "border-border"
                           )}>
                             <div className="min-w-0 flex-1">
-                              <div className="font-bold whitespace-nowrap">{item.time}</div>
+                              {item.time && <div className="font-bold whitespace-nowrap">{item.time}</div>}
                               <div className="text-sm font-semibold truncate">{item.speaker}</div>
                               <div className="text-xs text-muted-foreground truncate">{item.title}</div>
                             </div>
@@ -465,6 +515,10 @@ export function ControlPanel({
                   <h2 className="text-xl font-bold">Előadók (Gyorsvezérlő)</h2>
                 </div>
                 <div className="space-y-4">
+                  <p className="text-xs text-muted-foreground">
+                    Állítsd be, hány másodpercig látszódjon (alapból 5 mp). A <strong>Mutat</strong> után
+                    automatikusan elrejtődik — vagy nyomd meg a <strong>Rejtés</strong> gombot korábban.
+                  </p>
                   {lowerThirdsList.length > 0 ? (
                     <div className="space-y-2">
                       {lowerThirdsList.map(item => {
@@ -478,12 +532,27 @@ export function ControlPanel({
                               <div className="font-bold break-words whitespace-pre-wrap">{item.name}</div>
                               {item.title && <div className="text-sm text-muted-foreground break-words whitespace-pre-wrap">{item.title}</div>}
                             </div>
-                            <div className="flex gap-2 shrink-0">
-                              <Button 
+                            <div className="flex items-center gap-2 shrink-0">
+                              <div className="flex items-center gap-1">
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={600}
+                                  value={getDuration(item.id)}
+                                  onChange={(e) =>
+                                    setDurations(d => ({ ...d, [item.id]: parseInt(e.target.value) || 5 }))
+                                  }
+                                  className="h-11 w-16 text-center"
+                                  title="Hány másodpercig látszódjon a Mutat után"
+                                  aria-label="Megjelenítési idő másodpercben"
+                                />
+                                <span className="text-xs text-muted-foreground">mp</span>
+                              </div>
+                              <Button
                                 variant={isActive ? 'default' : 'secondary'}
                                 size="lg"
                                 className="w-24 font-bold"
-                                onClick={() => onActiveLowerThirdChange(isActive ? null : item)}
+                                onClick={() => handleToggleLowerThird(item)}
                               >
                                 {isActive ? 'Rejtés' : 'Mutat'}
                               </Button>
@@ -702,7 +771,7 @@ export function ControlPanel({
                     <Label>Új hozzáadása</Label>
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                       <Input
-                        placeholder="Időpont (pl. 14:00)"
+                        placeholder="Időpont (opcionális)"
                         value={newScheduleTime}
                         onChange={e => setNewScheduleTime(e.target.value)}
                         className="sm:col-span-1"
@@ -720,24 +789,39 @@ export function ControlPanel({
                       onChange={e => setNewScheduleTitle(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && handleAddSchedule()}
                     />
-                    <Button onClick={handleAddSchedule} disabled={!newScheduleTime.trim() || !newScheduleTitle.trim()}>
+                    <Button onClick={handleAddSchedule} disabled={!newScheduleTitle.trim()}>
                       Hozzáadás
                     </Button>
                   </div>
 
                   {scheduleList.length > 0 && (
                     <div className="space-y-2 mt-4">
-                      <Label>Mentett programpontok (Törlés)</Label>
+                      <Label>Mentett programpontok (Szerkeszthető)</Label>
                       {scheduleList.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-3 rounded-lg border border-border gap-3">
-                          <div className="min-w-0 flex-1">
-                            <div className="font-bold whitespace-nowrap">{item.time}</div>
-                            <div className="text-sm font-semibold truncate">{item.speaker}</div>
-                            <div className="text-xs text-muted-foreground truncate">{item.title}</div>
+                        <div key={item.id} className="grid gap-2 p-3 rounded-lg border border-border">
+                          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                            <Input
+                              placeholder="Időpont (opcionális)"
+                              value={item.time}
+                              onChange={e => handleUpdateSchedule(item.id, { time: e.target.value })}
+                              className="sm:col-span-1"
+                            />
+                            <Input
+                              placeholder="Előadó neve"
+                              value={item.speaker}
+                              onChange={e => handleUpdateSchedule(item.id, { speaker: e.target.value })}
+                              className="sm:col-span-2"
+                            />
                           </div>
-                          <Button 
-                            variant="destructive" 
+                          <Input
+                            placeholder="Előadás címe"
+                            value={item.title}
+                            onChange={e => handleUpdateSchedule(item.id, { title: e.target.value })}
+                          />
+                          <Button
+                            variant="destructive"
                             size="sm"
+                            className="justify-self-end"
                             onClick={() => handleRemoveSchedule(item.id)}
                           >
                             Törlés
@@ -832,11 +916,11 @@ export function ControlPanel({
       </Tabs>
 
       <Card className="mt-auto p-6">
-        <h3 className="mb-2 text-lg font-bold">Használati Útmutató</h3>
+        <h3 className="mb-2 text-lg font-bold">Használati Útmutató (Rétegek)</h3>
         <div className="grid gap-4 text-sm text-muted-foreground md:grid-cols-3">
           <div>
-            <p className="font-semibold text-foreground">1. OBS Browser Source</p>
-            <p>Másold be a fenti URL-t az OBS-be mint Browser Source (1920x1080)</p>
+            <p className="font-semibold text-foreground">1. Két Browser Source</p>
+            <p>Vedd fel a <strong>Felső</strong> réteget a kamera fölé, az <strong>Alsó</strong> réteget a kamera alá (mindkettő 1920x1080). Az OBS-ben a felül lévő forrás takarja az alatta lévőket.</p>
           </div>
           <div>
             <p className="font-semibold text-foreground">2. Jelenetek Váltása</p>
@@ -848,6 +932,31 @@ export function ControlPanel({
           </div>
         </div>
       </Card>
+    </div>
+  )
+}
+
+function UrlRow({ label, url, hint }: { label: string; url: string; hint?: string }) {
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <span className="text-sm font-bold">{label}</span>
+        <Button
+          variant="outline"
+          size="sm"
+          className="shrink-0"
+          onClick={() => {
+            navigator.clipboard.writeText(url)
+            toast.success('URL másolva a vágólapra')
+          }}
+        >
+          Másolás
+        </Button>
+      </div>
+      <code className="block overflow-x-auto rounded bg-secondary px-3 py-2 text-xs font-mono break-all">
+        {url}
+      </code>
+      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
   )
 }

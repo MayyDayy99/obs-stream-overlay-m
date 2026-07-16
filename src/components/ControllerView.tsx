@@ -52,16 +52,25 @@ export function ControllerView() {
   const [isHotkeyDialogOpen, setIsHotkeyDialogOpen] = useState(false)
 
   const handleSceneChange = (newScene: SceneType) => {
-    if (currentScene && currentScene !== newScene) {
+    // A 2–6 (nem élő) jelenetek toggle-ként működnek: ha a már aktív jelenetre
+    // kattintasz/nyomsz, visszavált élőre (a fedés kikapcsol) — nem kell külön az ÉLŐ.
+    const target: SceneType =
+      newScene !== 'live' && newScene === currentScene ? 'live' : newScene
+
+    if (currentScene && currentScene !== target) {
       setPreviousScene(currentScene)
     }
-    setCurrentScene(newScene)
-    
+    setCurrentScene(target)
+
     // Attempt to change OBS scene if connected. Map our SceneType to OBS Scene names if needed.
     // Assuming OBS scenes are named exactly like sceneLabels, e.g. "ÉLŐ"
-    obsData.changeScene(sceneLabels[newScene])
-    
-    toast.success(`Jelenet váltva: ${sceneLabels[newScene]}`)
+    obsData.changeScene(sceneLabels[target])
+
+    if (target === 'live' && newScene !== 'live') {
+      toast.success('Fedés kikapcsolva — vissza élőre')
+    } else {
+      toast.success(`Jelenet váltva: ${sceneLabels[target]}`)
+    }
   }
 
   const handleUndo = () => {
@@ -87,6 +96,7 @@ export function ControllerView() {
     { key: '3', handler: () => handleSceneChange('break'), description: 'EBÉDSZÜNET jelenet' },
     { key: '4', handler: () => handleSceneChange('coffee-break'), description: 'KÁVÉSZÜNET jelenet' },
     { key: '5', handler: () => handleSceneChange('ending'), description: 'VÉGE jelenet' },
+    { key: '6', handler: () => handleSceneChange('technical-issue'), description: 'TECHNIKAI SZÜNET jelenet' },
     { key: 't', handler: () => handleTimerToggle(), description: 'Időzítő indítása/leállítása' },
     { key: 'z', ctrl: true, handler: () => handleUndo(), description: 'Előző jelenet visszaállítása' },
     { key: '?', handler: () => setIsHotkeyDialogOpen(true), description: 'Gyorsbillentyűk megjelenítése' },
