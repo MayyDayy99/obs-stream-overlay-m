@@ -292,8 +292,8 @@ export function StreamOverlay({
               return (
                 <div className="overlay-schedule-content">
                   <div className="overlay-schedule-label">KÖVETKEZŐ</div>
-                  <div className="overlay-schedule-time">{item.time}</div>
-                  <div className="overlay-schedule-speaker">{item.speaker}</div>
+                  {item.time && <div className="overlay-schedule-time">{item.time}</div>}
+                  {item.speaker && <div className="overlay-schedule-speaker">{item.speaker}</div>}
                   <div className="overlay-schedule-title">{item.title}</div>
                 </div>
               )

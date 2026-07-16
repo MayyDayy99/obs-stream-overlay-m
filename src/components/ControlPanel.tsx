@@ -200,7 +200,8 @@ export function ControlPanel({
   }
 
   const handleAddSchedule = () => {
-    if (!newScheduleTime.trim() || !newScheduleTitle.trim()) return
+    // Az időpont opcionális; csak a cím kötelező
+    if (!newScheduleTitle.trim()) return
     const newItem: ScheduleItem = {
       id: Math.random().toString(36).substring(2, 9),
       time: newScheduleTime.trim(),
@@ -212,10 +213,14 @@ export function ControlPanel({
     setNewScheduleTitle('')
     setNewScheduleSpeaker('')
   }
-  
+
   const handleRemoveSchedule = (id: string) => {
     onScheduleListChange(prev => prev.filter(item => item.id !== id))
     if (activeScheduleId === id) onActiveScheduleIdChange(null)
+  }
+
+  const handleUpdateSchedule = (id: string, patch: Partial<ScheduleItem>) => {
+    onScheduleListChange(prev => prev.map(item => item.id === id ? { ...item, ...patch } : item))
   }
 
   const handleAddSocial = () => {
@@ -481,7 +486,7 @@ export function ControlPanel({
                             isActive ? "border-primary bg-primary/10" : "border-border"
                           )}>
                             <div className="min-w-0 flex-1">
-                              <div className="font-bold whitespace-nowrap">{item.time}</div>
+                              {item.time && <div className="font-bold whitespace-nowrap">{item.time}</div>}
                               <div className="text-sm font-semibold truncate">{item.speaker}</div>
                               <div className="text-xs text-muted-foreground truncate">{item.title}</div>
                             </div>
@@ -766,7 +771,7 @@ export function ControlPanel({
                     <Label>Új hozzáadása</Label>
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                       <Input
-                        placeholder="Időpont (pl. 14:00)"
+                        placeholder="Időpont (opcionális)"
                         value={newScheduleTime}
                         onChange={e => setNewScheduleTime(e.target.value)}
                         className="sm:col-span-1"
@@ -784,24 +789,39 @@ export function ControlPanel({
                       onChange={e => setNewScheduleTitle(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && handleAddSchedule()}
                     />
-                    <Button onClick={handleAddSchedule} disabled={!newScheduleTime.trim() || !newScheduleTitle.trim()}>
+                    <Button onClick={handleAddSchedule} disabled={!newScheduleTitle.trim()}>
                       Hozzáadás
                     </Button>
                   </div>
 
                   {scheduleList.length > 0 && (
                     <div className="space-y-2 mt-4">
-                      <Label>Mentett programpontok (Törlés)</Label>
+                      <Label>Mentett programpontok (Szerkeszthető)</Label>
                       {scheduleList.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-3 rounded-lg border border-border gap-3">
-                          <div className="min-w-0 flex-1">
-                            <div className="font-bold whitespace-nowrap">{item.time}</div>
-                            <div className="text-sm font-semibold truncate">{item.speaker}</div>
-                            <div className="text-xs text-muted-foreground truncate">{item.title}</div>
+                        <div key={item.id} className="grid gap-2 p-3 rounded-lg border border-border">
+                          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                            <Input
+                              placeholder="Időpont (opcionális)"
+                              value={item.time}
+                              onChange={e => handleUpdateSchedule(item.id, { time: e.target.value })}
+                              className="sm:col-span-1"
+                            />
+                            <Input
+                              placeholder="Előadó neve"
+                              value={item.speaker}
+                              onChange={e => handleUpdateSchedule(item.id, { speaker: e.target.value })}
+                              className="sm:col-span-2"
+                            />
                           </div>
-                          <Button 
-                            variant="destructive" 
+                          <Input
+                            placeholder="Előadás címe"
+                            value={item.title}
+                            onChange={e => handleUpdateSchedule(item.id, { title: e.target.value })}
+                          />
+                          <Button
+                            variant="destructive"
                             size="sm"
+                            className="justify-self-end"
                             onClick={() => handleRemoveSchedule(item.id)}
                           >
                             Törlés
