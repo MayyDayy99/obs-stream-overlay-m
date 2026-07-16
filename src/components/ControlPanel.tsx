@@ -24,7 +24,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { SceneType, ThemeType, IndicatorType, LowerThirdData, ScheduleItem, SocialMessage } from '@/components/StreamOverlay'
 import { ExcelManager } from '@/components/ExcelManager'
-import { ROOM_ID } from '@/hooks/useSharedState'
+import { ROOM_ID, useSharedState } from '@/hooks/useSharedState'
 
 interface ControlPanelProps {
   currentScene: SceneType
@@ -167,9 +167,11 @@ export function ControlPanel({
 
   const [newSocialMsg, setNewSocialMsg] = useState('')
 
-  // Előadónkénti megjelenítési idő (mp). Alapból 5 mp. Csak vezérlő-oldali UI állapot.
+  // Alapértelmezett megjelenítési idő (mp) – állítható, megosztott állapotban perzisztál.
+  const [defaultSec, setDefaultSec] = useSharedState<number>('obs-lt-default-sec', 10)
+  // Előadónkénti felülírás (mp). Csak vezérlő-oldali UI állapot.
   const [durations, setDurations] = useState<Record<string, number>>({})
-  const getDuration = (id: string) => durations[id] ?? 5
+  const getDuration = (id: string) => durations[id] ?? defaultSec
   // A "Mutat" utáni automatikus elrejtés időzítője
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -515,9 +517,25 @@ export function ControlPanel({
                   <h2 className="text-xl font-bold">Előadók (Gyorsvezérlő)</h2>
                 </div>
                 <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-2 rounded-lg border border-border p-3">
+                    <Label htmlFor="lt-default" className="text-sm">Alapértelmezett megjelenítési idő</Label>
+                    <div className="flex items-center gap-1">
+                      <Input
+                        id="lt-default"
+                        type="number"
+                        min={1}
+                        max={600}
+                        value={defaultSec}
+                        onChange={e => setDefaultSec(parseInt(e.target.value) || 10)}
+                        className="h-9 w-20 text-center"
+                        title="Ez az alapérték minden előadóra, amíg soronként felül nem írod"
+                      />
+                      <span className="text-xs text-muted-foreground">mp</span>
+                    </div>
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Állítsd be, hány másodpercig látszódjon (alapból 5 mp). A <strong>Mutat</strong> után
-                    automatikusan elrejtődik — vagy nyomd meg a <strong>Rejtés</strong> gombot korábban.
+                    A <strong>Mutat</strong> után ennyi ideig látszik, majd automatikusan elrejtődik.
+                    Soronként felül is írhatod; a <strong>Rejtés</strong> gombbal bármikor levehető.
                   </p>
                   {lowerThirdsList.length > 0 ? (
                     <div className="space-y-2">
@@ -540,7 +558,7 @@ export function ControlPanel({
                                   max={600}
                                   value={getDuration(item.id)}
                                   onChange={(e) =>
-                                    setDurations(d => ({ ...d, [item.id]: parseInt(e.target.value) || 5 }))
+                                    setDurations(d => ({ ...d, [item.id]: parseInt(e.target.value) || defaultSec }))
                                   }
                                   className="h-11 w-16 text-center"
                                   title="Hány másodpercig látszódjon a Mutat után"
