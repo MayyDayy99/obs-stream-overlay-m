@@ -63,11 +63,34 @@ function flushUpdates() {
   fetch(`${NTFY_BASE}/${TOPIC}`, {
     method: 'POST',
     body: JSON.stringify({ cid: CLIENT_ID, updates }),
-  }).catch(err => {
-    console.error('[sync] publish error', err)
-    // Re-queue on failure
-    pendingUpdates = { ...updates, ...pendingUpdates }
   })
+    .then(resp => {
+      // fetch resolves even on 429/5xx, so check the status explicitly
+      if (!resp.ok) throw new Error(`ntfy status ${resp.status}`)
+    })
+    .catch(err => {
+      console.error('[sync] publish error, retrying', err)
+      // Re-queue and retry shortly so a dropped/throttled publish self-heals
+      // (otherwise the update would only be resent on the next change).
+      pendingUpdates = { ...updates, ...pendingUpdates }
+      if (writeTimer) clearTimeout(writeTimer)
+      writeTimer = setTimeout(flushUpdates, 2000)
+    })
+}
+
+// Re-publish the entire current state in one shot, forcing every connected
+// overlay to catch up. Useful when an overlay missed an update (dropped SSE
+// event or a throttled publish) even though the connection looks active.
+export function resyncAll() {
+  const updates: Record<string, any> = {}
+  for (const key of Object.keys(cloudState)) {
+    updates[key] = cloudState[key]
+  }
+  if (Object.keys(updates).length === 0) return
+  fetch(`${NTFY_BASE}/${TOPIC}`, {
+    method: 'POST',
+    body: JSON.stringify({ cid: CLIENT_ID, updates }),
+  }).catch(err => console.error('[sync] resync error', err))
 }
 
 function publishState(key: string, value: any) {
