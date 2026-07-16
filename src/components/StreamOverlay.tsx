@@ -7,6 +7,9 @@ import { FloatingOE } from './FloatingOE'
 export type SceneType = 'live' | 'starting-soon' | 'break' | 'coffee-break' | 'ending' | 'technical-issue'
 export type ThemeType = 'kek' | 'sotet' | 'vilagos'
 export type IndicatorType = 'dots' | 'bar' | 'pulse' | 'hologram' | 'morph'
+// Réteg mód: 'all' = minden egyben (eredeti), 'bottom' = alsó réteg (kamera alá),
+// 'top' = felső réteg (kamera fölé)
+export type OverlayLayer = 'all' | 'bottom' | 'top'
 
 export interface LowerThirdData {
   id: string
@@ -46,6 +49,7 @@ interface StreamOverlayProps {
   isSocialRotatorActive: boolean
   bgmVolume: number
   isBgmPlaying: boolean
+  layer?: OverlayLayer
 }
 
 const sceneMessages: Record<SceneType, string> = {
@@ -172,10 +176,19 @@ export function StreamOverlay({
   isSocialRotatorActive = false,
   bgmVolume = 50,
   isBgmPlaying = false,
+  layer = 'all',
 }: StreamOverlayProps) {
   const isLive = scene === 'live'
   const themeVars = THEMES[theme] || THEMES.kek
   const isVilagos = theme === 'vilagos'
+
+  const isBottomLayer = layer === 'bottom'
+  // Layer 1 (bottom / kamera alá): mindig a márkázott háttér, fedés és feliratok nélkül.
+  // Layer 2 (top / kamera fölé) és 'all': eredeti viselkedés (élőben átlátszó, szünetben fedés).
+  const showBackground = isBottomLayer ? true : !isLive   // animált háttér + vignetta
+  const showCover = isBottomLayer ? false : !isLive        // logó + főcím + visszaszámláló
+  const showForeground = !isBottomLayer                    // lábléc, alsó sáv, menetrend, közösségi
+  const opaqueBg = isBottomLayer ? true : !isLive          // átlátszatlan --bg kitöltés
 
   const audioRef = useRef<HTMLAudioElement>(null)
 
@@ -193,7 +206,7 @@ export function StreamOverlay({
   const styleVars: Record<string, string> = { 
     ...themeVars, 
     '--accent': accentColor,
-    background: isLive ? 'transparent' : 'var(--bg)'
+    background: opaqueBg ? 'var(--bg)' : 'transparent'
   }
   
   const headlineText = customMessage || sceneMessages[scene] || ''
@@ -202,7 +215,7 @@ export function StreamOverlay({
 
   return (
     <div className={`overlay-scene ${isLive ? 'is-live' : ''}`} data-theme={theme} style={styleVars as React.CSSProperties}>
-      <div className="overlay-bg" style={{ opacity: isLive ? 0 : 1, transition: 'opacity 0.6s ease' }}>
+      <div className="overlay-bg" style={{ opacity: showBackground ? 1 : 0, transition: 'opacity 0.6s ease' }}>
         <FloatingOE text={floatingText || 'OE'} />
         <div className="overlay-noise" />
         <div className="overlay-orb a" />
@@ -212,9 +225,9 @@ export function StreamOverlay({
         <div className="overlay-orb e" />
       </div>
       
-      {!isLive && <div className="overlay-vignette" />}
+      {showBackground && <div className="overlay-vignette" />}
 
-      {!isLive && (
+      {showCover && (
         <div className="overlay-center">
           <div className="overlay-logo-container">
             <img 
@@ -231,17 +244,19 @@ export function StreamOverlay({
         </div>
       )}
 
-      <div className="overlay-footer">
-        {showLive
-          ? <span className="overlay-live"><span className="overlay-live-dot" />{liveLabel}</span>
-          : <span />}
-        <span className="spacer" />
-        {showClock ? <Clock /> : <span />}
-      </div>
+      {showForeground && (
+        <div className="overlay-footer">
+          {showLive
+            ? <span className="overlay-live"><span className="overlay-live-dot" />{liveLabel}</span>
+            : <span />}
+          <span className="spacer" />
+          {showClock ? <Clock /> : <span />}
+        </div>
+      )}
 
       {/* Lower Third */}
       <AnimatePresence mode="wait">
-        {activeLowerThird && (
+        {showForeground && activeLowerThird && (
           <motion.div 
             key={activeLowerThird.id}
             className="overlay-lower-third"
@@ -262,7 +277,7 @@ export function StreamOverlay({
 
       {/* Up Next / Schedule */}
       <AnimatePresence mode="wait">
-        {activeScheduleId && (
+        {showForeground && activeScheduleId && (
           <motion.div
             key={activeScheduleId}
             className="overlay-schedule"
@@ -289,18 +304,20 @@ export function StreamOverlay({
 
       {/* Social Media Rotator */}
       <AnimatePresence>
-        {isSocialRotatorActive && socialMessages.length > 0 && (
+        {showForeground && isSocialRotatorActive && socialMessages.length > 0 && (
           <SocialRotator messages={socialMessages} />
         )}
       </AnimatePresence>
 
-      {/* Audio Element */}
-      <audio 
-        ref={audioRef} 
-        src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" 
-        loop 
-        preload="auto" 
-      />
+      {/* Audio Element – csak a felső / egyesített rétegen, hogy ne szóljon duplán */}
+      {!isBottomLayer && (
+        <audio
+          ref={audioRef}
+          src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"
+          loop
+          preload="auto"
+        />
+      )}
     </div>
   )
 }

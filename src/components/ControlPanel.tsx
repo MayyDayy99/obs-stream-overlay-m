@@ -24,6 +24,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { SceneType, ThemeType, IndicatorType, LowerThirdData, ScheduleItem, SocialMessage } from '@/components/StreamOverlay'
 import { ExcelManager } from '@/components/ExcelManager'
+import { ROOM_ID } from '@/hooks/useSharedState'
 
 interface ControlPanelProps {
   currentScene: SceneType
@@ -153,7 +154,10 @@ export function ControlPanel({
   onBgmPlayingChange,
   obsData,
 }: ControlPanelProps) {
-  const overlayUrl = `${window.location.origin}${window.location.pathname}`
+  const baseUrl = `${window.location.origin}${window.location.pathname}?room=${ROOM_ID}`
+  const overlayUrlAll = `${baseUrl}#/`
+  const overlayUrlBottom = `${baseUrl}#/l1`
+  const overlayUrlTop = `${baseUrl}#/l2`
   const [newName, setNewName] = useState('')
   const [newTitle, setNewTitle] = useState('')
 
@@ -256,25 +260,30 @@ export function ControlPanel({
       </div>
 
       <Card className="p-4 sm:p-6 border-primary/30">
-        <h3 className="mb-3 text-lg font-bold">OBS Browser Source URL</h3>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <code className="min-w-0 flex-1 overflow-x-auto rounded-md bg-secondary px-4 py-3 text-sm font-mono break-all">
-            {overlayUrl}
-          </code>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full sm:w-auto shrink-0"
-            onClick={() => {
-              navigator.clipboard.writeText(overlayUrl)
-              toast.success('URL másolva a vágólapra')
-            }}
-          >
-            Másolás
-          </Button>
+        <h3 className="mb-1 text-lg font-bold">OBS Browser Source URL-ek (Rétegek)</h3>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Két külön böngésző-forrás, közös szobával. Az OBS-ben a <strong>felső</strong> réteg a kamera <strong>fölé</strong>,
+          az <strong>alsó</strong> réteg a kamera <strong>alá</strong> kerüljön. Mindkettőt ez a vezérlő irányítja.
+        </p>
+        <div className="space-y-3">
+          <UrlRow
+            label="⬆️ Felső réteg — kamera FÖLÉ (Layer 2)"
+            url={overlayUrlTop}
+            hint="Szünet-fedések (HAMAROSAN, EBÉD, KÁVÉ, VÉGE, TECHNIKAI) és az élő feliratok: alsó sáv, lábléc, menetrend, közösségi rotátor."
+          />
+          <UrlRow
+            label="⬇️ Alsó réteg — kamera ALÁ (Layer 1)"
+            url={overlayUrlBottom}
+            hint="Az élő közvetítés márkázott, animált háttere a kamera mögött. Ha a kamerád kitölti a teljes képet, ez nem látszik."
+          />
+          <UrlRow
+            label="Egyszerű mód — egyetlen forrás (mindent mutat)"
+            url={overlayUrlAll}
+            hint="Ha nem akarsz két réteget: az eredeti overlay, ami mindent egyben mutat, a kamera fölé téve."
+          />
         </div>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Ajánlott felbontás: 1920x1080 | Add hozzá OBS-ben mint Browser Source
+        <p className="mt-3 text-sm text-muted-foreground">
+          Ajánlott felbontás: 1920x1080 | OBS → Browser Source
         </p>
       </Card>
 
@@ -832,11 +841,11 @@ export function ControlPanel({
       </Tabs>
 
       <Card className="mt-auto p-6">
-        <h3 className="mb-2 text-lg font-bold">Használati Útmutató</h3>
+        <h3 className="mb-2 text-lg font-bold">Használati Útmutató (Rétegek)</h3>
         <div className="grid gap-4 text-sm text-muted-foreground md:grid-cols-3">
           <div>
-            <p className="font-semibold text-foreground">1. OBS Browser Source</p>
-            <p>Másold be a fenti URL-t az OBS-be mint Browser Source (1920x1080)</p>
+            <p className="font-semibold text-foreground">1. Két Browser Source</p>
+            <p>Vedd fel a <strong>Felső</strong> réteget a kamera fölé, az <strong>Alsó</strong> réteget a kamera alá (mindkettő 1920x1080). Az OBS-ben a felül lévő forrás takarja az alatta lévőket.</p>
           </div>
           <div>
             <p className="font-semibold text-foreground">2. Jelenetek Váltása</p>
@@ -848,6 +857,31 @@ export function ControlPanel({
           </div>
         </div>
       </Card>
+    </div>
+  )
+}
+
+function UrlRow({ label, url, hint }: { label: string; url: string; hint?: string }) {
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <span className="text-sm font-bold">{label}</span>
+        <Button
+          variant="outline"
+          size="sm"
+          className="shrink-0"
+          onClick={() => {
+            navigator.clipboard.writeText(url)
+            toast.success('URL másolva a vágólapra')
+          }}
+        >
+          Másolás
+        </Button>
+      </div>
+      <code className="block overflow-x-auto rounded bg-secondary px-3 py-2 text-xs font-mono break-all">
+        {url}
+      </code>
+      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
     </div>
   )
 }
