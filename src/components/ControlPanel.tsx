@@ -308,6 +308,7 @@ export function ControlPanel({
                       <motion.div key={btn.scene} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={() => onSceneChange(btn.scene)}
+                          title={isActive && btn.scene !== 'live' ? 'Kattints újra a kikapcsoláshoz (vissza élőre)' : undefined}
                           className={cn(
                             "relative h-24 w-full flex-col gap-2 whitespace-normal px-2 text-center text-base font-bold transition-all sm:h-32 sm:gap-3 sm:text-lg",
                             isActive && "ring-4 ring-primary shadow-[0_0_20px_rgba(200,0,0,0.5)]"
@@ -328,8 +329,11 @@ export function ControlPanel({
                     )
                   })}
                 </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  A szünet-jelenetek (2–6) kapcsolóként működnek: kattints ugyanarra újra a kikapcsoláshoz (vissza élőre).
+                </p>
               </Card>
-              
+
               {/* Floating Text LIVE */}
               <Card className="p-4 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">

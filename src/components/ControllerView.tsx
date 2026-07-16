@@ -52,16 +52,25 @@ export function ControllerView() {
   const [isHotkeyDialogOpen, setIsHotkeyDialogOpen] = useState(false)
 
   const handleSceneChange = (newScene: SceneType) => {
-    if (currentScene && currentScene !== newScene) {
+    // A 2–6 (nem élő) jelenetek toggle-ként működnek: ha a már aktív jelenetre
+    // kattintasz/nyomsz, visszavált élőre (a fedés kikapcsol) — nem kell külön az ÉLŐ.
+    const target: SceneType =
+      newScene !== 'live' && newScene === currentScene ? 'live' : newScene
+
+    if (currentScene && currentScene !== target) {
       setPreviousScene(currentScene)
     }
-    setCurrentScene(newScene)
-    
+    setCurrentScene(target)
+
     // Attempt to change OBS scene if connected. Map our SceneType to OBS Scene names if needed.
     // Assuming OBS scenes are named exactly like sceneLabels, e.g. "ÉLŐ"
-    obsData.changeScene(sceneLabels[newScene])
-    
-    toast.success(`Jelenet váltva: ${sceneLabels[newScene]}`)
+    obsData.changeScene(sceneLabels[target])
+
+    if (target === 'live' && newScene !== 'live') {
+      toast.success('Fedés kikapcsolva — vissza élőre')
+    } else {
+      toast.success(`Jelenet váltva: ${sceneLabels[target]}`)
+    }
   }
 
   const handleUndo = () => {
