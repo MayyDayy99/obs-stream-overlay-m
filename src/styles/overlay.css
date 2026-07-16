@@ -106,24 +106,39 @@
 }
 
 
-/* Center stack */
+/* Center stack – fixed anchors so nothing shifts between scenes/states */
 .overlay-center {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(22px, 3.4vh, 46px);
-  padding: 0 6vw;
   text-align: center;
 }
+
+/* Each region is pinned to a fixed vertical point and centred on it, so the
+   logo, headline, indicator/countdown and subtitle keep the exact same place
+   regardless of text length or whether a countdown or indicator is shown. */
+.overlay-anchor {
+  position: absolute;
+  left: 50%;
+  width: 100%;
+  padding: 0 6vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+}
+
+.overlay-anchor-logo     { top: 30%; }
+.overlay-anchor-headline { top: 47%; }
+.overlay-anchor-status   { top: 61%; }
+.overlay-anchor-subtitle { top: 74%; }
 
 .overlay-logo-container {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 2rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
   z-index: 10;
   transform-style: preserve-3d;
 }
@@ -551,7 +566,7 @@
   .overlay-pulse .ring, .overlay-live-dot {
     animation: none !important;
   }
-  .overlay-center > *, .overlay-footer {
+  .overlay-anchor > *, .overlay-footer {
     animation: appear 0.6s ease both !important;
   }
 }
