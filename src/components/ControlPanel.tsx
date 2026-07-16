@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -166,6 +166,38 @@ export function ControlPanel({
   const [newScheduleSpeaker, setNewScheduleSpeaker] = useState('')
 
   const [newSocialMsg, setNewSocialMsg] = useState('')
+
+  // Előadónkénti megjelenítési idő (mp). Alapból 5 mp. Csak vezérlő-oldali UI állapot.
+  const [durations, setDurations] = useState<Record<string, number>>({})
+  const getDuration = (id: string) => durations[id] ?? 5
+  // A "Mutat" utáni automatikus elrejtés időzítője
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => { if (hideTimerRef.current) clearTimeout(hideTimerRef.current) }
+  }, [])
+
+  const handleToggleLowerThird = (item: LowerThirdData) => {
+    // Előző automatikus elrejtés törlése
+    if (hideTimerRef.current) { clearTimeout(hideTimerRef.current); hideTimerRef.current = null }
+
+    const isActive = activeLowerThird?.id === item.id
+    if (isActive) {
+      // Kézi elrejtés
+      onActiveLowerThirdChange(null)
+      return
+    }
+
+    onActiveLowerThirdChange(item)
+
+    const secs = getDuration(item.id)
+    if (secs > 0) {
+      hideTimerRef.current = setTimeout(() => {
+        onActiveLowerThirdChange(null)
+        hideTimerRef.current = null
+      }, secs * 1000)
+    }
+  }
 
   const handleAddSchedule = () => {
     if (!newScheduleTime.trim() || !newScheduleTitle.trim()) return
@@ -478,6 +510,10 @@ export function ControlPanel({
                   <h2 className="text-xl font-bold">Előadók (Gyorsvezérlő)</h2>
                 </div>
                 <div className="space-y-4">
+                  <p className="text-xs text-muted-foreground">
+                    Állítsd be, hány másodpercig látszódjon (alapból 5 mp). A <strong>Mutat</strong> után
+                    automatikusan elrejtődik — vagy nyomd meg a <strong>Rejtés</strong> gombot korábban.
+                  </p>
                   {lowerThirdsList.length > 0 ? (
                     <div className="space-y-2">
                       {lowerThirdsList.map(item => {
@@ -491,12 +527,27 @@ export function ControlPanel({
                               <div className="font-bold break-words whitespace-pre-wrap">{item.name}</div>
                               {item.title && <div className="text-sm text-muted-foreground break-words whitespace-pre-wrap">{item.title}</div>}
                             </div>
-                            <div className="flex gap-2 shrink-0">
-                              <Button 
+                            <div className="flex items-center gap-2 shrink-0">
+                              <div className="flex items-center gap-1">
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={600}
+                                  value={getDuration(item.id)}
+                                  onChange={(e) =>
+                                    setDurations(d => ({ ...d, [item.id]: parseInt(e.target.value) || 5 }))
+                                  }
+                                  className="h-11 w-16 text-center"
+                                  title="Hány másodpercig látszódjon a Mutat után"
+                                  aria-label="Megjelenítési idő másodpercben"
+                                />
+                                <span className="text-xs text-muted-foreground">mp</span>
+                              </div>
+                              <Button
                                 variant={isActive ? 'default' : 'secondary'}
                                 size="lg"
                                 className="w-24 font-bold"
-                                onClick={() => onActiveLowerThirdChange(isActive ? null : item)}
+                                onClick={() => handleToggleLowerThird(item)}
                               >
                                 {isActive ? 'Rejtés' : 'Mutat'}
                               </Button>
