@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { useHotkeys } from '@/hooks/use-hotkeys'
 import { Button } from '@/components/ui/button'
-import { Radio, Keyboard, Copy, DeviceTabletCamera } from '@phosphor-icons/react'
+import { Radio, Keyboard, Copy, DeviceTabletCamera, ArrowsClockwise } from '@phosphor-icons/react'
 import type { SceneType, ThemeType, IndicatorType, LowerThirdData, ScheduleItem, SocialMessage } from '@/components/StreamOverlay'
 
 const sceneLabels: Record<SceneType, string> = {
@@ -18,7 +18,7 @@ const sceneLabels: Record<SceneType, string> = {
   'technical-issue': 'HIBA'
 }
 
-import { useConnectionStatus } from '@/hooks/useSharedState'
+import { useConnectionStatus, resyncAll } from '@/hooks/useSharedState'
 import { useOBS } from '@/hooks/useOBS'
 
 export function ControllerView() {
@@ -109,6 +109,11 @@ export function ControllerView() {
     toast.success('Link másolva! Küldd el magadnak és nyisd meg a tableten!')
   }
 
+  const handleResync = () => {
+    resyncAll()
+    toast.success('Újraszinkronizálva — az overlay(ek) frissítve')
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -152,10 +157,16 @@ export function ControllerView() {
                 <p className="text-xs text-muted-foreground mt-1">Szoba: <code className="bg-white/10 px-1 rounded">{ROOM_ID}</code></p>
               </div>
             </div>
-            <Button variant="default" size="sm" onClick={handleCopyRemoteUrl} className="w-full whitespace-nowrap sm:w-auto sm:shrink-0">
-              <Copy size={16} className="mr-2" />
-              Link Másolása
-            </Button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:shrink-0">
+              <Button variant="outline" size="sm" onClick={handleResync} className="w-full whitespace-nowrap sm:w-auto">
+                <ArrowsClockwise size={16} className="mr-2" />
+                Újraszinkron
+              </Button>
+              <Button variant="default" size="sm" onClick={handleCopyRemoteUrl} className="w-full whitespace-nowrap sm:w-auto">
+                <Copy size={16} className="mr-2" />
+                Link Másolása
+              </Button>
+            </div>
           </div>
           <p className="text-xs text-muted-foreground break-all">{remoteUrl}</p>
         </div>
