@@ -229,18 +229,26 @@ export function StreamOverlay({
 
       {showCover && (
         <div className="overlay-center">
-          <div className="overlay-logo-container">
-            <img 
-              src={isVilagos ? oeLogoColor : oeLogo} 
-              alt="Logo" 
-              className="overlay-logo" 
-            />
+          <div className="overlay-anchor overlay-anchor-logo">
+            <div className="overlay-logo-container">
+              <img
+                src={isVilagos ? oeLogoColor : oeLogo}
+                alt="Logo"
+                className="overlay-logo"
+              />
+            </div>
           </div>
-          <Headline text={headlineText} />
-          {isTimerActive
-            ? <Countdown minutes={timerMinutes} key={timerMinutes} />
-            : <Indicator kind={indicator} />}
-          {subtitleText && <p className="overlay-subtitle">{subtitleText}</p>}
+          <div className="overlay-anchor overlay-anchor-headline">
+            <Headline text={headlineText} />
+          </div>
+          <div className="overlay-anchor overlay-anchor-status">
+            {isTimerActive
+              ? <Countdown minutes={timerMinutes} key={timerMinutes} />
+              : <Indicator kind={indicator} />}
+          </div>
+          <div className="overlay-anchor overlay-anchor-subtitle">
+            {subtitleText && <p className="overlay-subtitle">{subtitleText}</p>}
+          </div>
         </div>
       )}
 
