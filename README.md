@@ -34,6 +34,7 @@ Professional OBS streaming overlay manager for Óbuda University broadcasts with
 - `3` - EBÉDSZÜNET (Lunch Break)
 - `4` - KÁVÉSZÜNET (Coffee Break)
 - `5` - VÉGE (Ending)
+- `6` - TECHNIKAI SZÜNET (Technical Issue)
 - `T` - Toggle timer
 - `Ctrl+Z` - Undo scene change
 - `?` - Show hotkey reference

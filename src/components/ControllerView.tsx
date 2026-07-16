@@ -87,6 +87,7 @@ export function ControllerView() {
     { key: '3', handler: () => handleSceneChange('break'), description: 'EBÉDSZÜNET jelenet' },
     { key: '4', handler: () => handleSceneChange('coffee-break'), description: 'KÁVÉSZÜNET jelenet' },
     { key: '5', handler: () => handleSceneChange('ending'), description: 'VÉGE jelenet' },
+    { key: '6', handler: () => handleSceneChange('technical-issue'), description: 'TECHNIKAI SZÜNET jelenet' },
     { key: 't', handler: () => handleTimerToggle(), description: 'Időzítő indítása/leállítása' },
     { key: 'z', ctrl: true, handler: () => handleUndo(), description: 'Előző jelenet visszaállítása' },
     { key: '?', handler: () => setIsHotkeyDialogOpen(true), description: 'Gyorsbillentyűk megjelenítése' },
