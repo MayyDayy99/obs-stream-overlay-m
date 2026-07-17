@@ -19,7 +19,7 @@ export function OverlayView({ layer = 'all' }: { layer?: OverlayLayer }) {
   const [activeLowerThird] = useSharedState<LowerThirdData | null>('obs-lower-third-active', null)
 
   const [scheduleList] = useSharedState<ScheduleItem[]>('obs-schedule-list', [])
-  const [activeScheduleId] = useSharedState<string | null>('obs-schedule-active', null)
+  const [activeSchedule] = useSharedState<ScheduleItem | string | null>('obs-schedule-active', null)
   
   const [socialMessages] = useSharedState<SocialMessage[]>('obs-social-msgs', [])
   const [isSocialRotatorActive] = useSharedState<boolean>('obs-social-active', false)
@@ -45,7 +45,7 @@ export function OverlayView({ layer = 'all' }: { layer?: OverlayLayer }) {
         floatingText={floatingText || 'OE'}
         activeLowerThird={activeLowerThird}
         scheduleList={scheduleList}
-        activeScheduleId={activeScheduleId}
+        activeSchedule={activeSchedule}
         socialMessages={socialMessages}
         isSocialRotatorActive={isSocialRotatorActive}
         bgmVolume={bgmVolume}

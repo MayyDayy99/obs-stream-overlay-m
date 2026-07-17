@@ -44,7 +44,7 @@ interface StreamOverlayProps {
   floatingText: string
   activeLowerThird: LowerThirdData | null
   scheduleList: ScheduleItem[]
-  activeScheduleId: string | null
+  activeSchedule: ScheduleItem | string | null
   socialMessages: SocialMessage[]
   isSocialRotatorActive: boolean
   bgmVolume: number
@@ -171,7 +171,7 @@ export function StreamOverlay({
   floatingText,
   activeLowerThird,
   scheduleList = [],
-  activeScheduleId = null,
+  activeSchedule = null,
   socialMessages = [],
   isSocialRotatorActive = false,
   bgmVolume = 50,
@@ -212,6 +212,15 @@ export function StreamOverlay({
   const headlineText = customMessage || sceneMessages[scene] || ''
   const subtitleText = subtitle || sceneSubtitles[scene] || ''
   const timerMinutes = Math.ceil(timerSeconds / 60)
+
+  // Az aktív menetrend-pont lehet teljes objektum (új, önmagában elég) vagy régi
+  // id string (visszafelé kompatibilitás) — utóbbit a listából oldjuk fel.
+  const scheduleItem: ScheduleItem | null =
+    activeSchedule
+      ? (typeof activeSchedule === 'object'
+          ? activeSchedule
+          : scheduleList.find(s => s.id === activeSchedule) || null)
+      : null
 
   return (
     <div className={`overlay-scene ${isLive ? 'is-live' : ''}`} data-theme={theme} style={styleVars as React.CSSProperties}>
@@ -285,27 +294,21 @@ export function StreamOverlay({
 
       {/* Up Next / Schedule */}
       <AnimatePresence mode="wait">
-        {showForeground && activeScheduleId && (
+        {showForeground && scheduleItem && (
           <motion.div
-            key={activeScheduleId}
+            key={scheduleItem.id}
             className="overlay-schedule"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
           >
-            {(() => {
-              const item = scheduleList.find(s => s.id === activeScheduleId)
-              if (!item) return null
-              return (
-                <div className="overlay-schedule-content">
-                  <div className="overlay-schedule-label">KÖVETKEZŐ</div>
-                  {item.time && <div className="overlay-schedule-time">{item.time}</div>}
-                  {item.speaker && <div className="overlay-schedule-speaker">{item.speaker}</div>}
-                  <div className="overlay-schedule-title">{item.title}</div>
-                </div>
-              )
-            })()}
+            <div className="overlay-schedule-content">
+              <div className="overlay-schedule-label">KÖVETKEZŐ</div>
+              {scheduleItem.time && <div className="overlay-schedule-time">{scheduleItem.time}</div>}
+              {scheduleItem.speaker && <div className="overlay-schedule-speaker">{scheduleItem.speaker}</div>}
+              <div className="overlay-schedule-title">{scheduleItem.title}</div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

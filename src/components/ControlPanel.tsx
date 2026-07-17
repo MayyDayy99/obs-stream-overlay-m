@@ -61,8 +61,8 @@ interface ControlPanelProps {
   
   scheduleList: ScheduleItem[]
   onScheduleListChange: (list: ScheduleItem[] | ((prev: ScheduleItem[]) => ScheduleItem[])) => void
-  activeScheduleId: string | null
-  onActiveScheduleIdChange: (id: string | null) => void
+  activeSchedule: ScheduleItem | null
+  onActiveScheduleChange: (item: ScheduleItem | null) => void
   
   socialMessages: SocialMessage[]
   onSocialMessagesChange: (list: SocialMessage[] | ((prev: SocialMessage[]) => SocialMessage[])) => void
@@ -142,8 +142,8 @@ export function ControlPanel({
   onShowHotkeys,
   scheduleList,
   onScheduleListChange,
-  activeScheduleId,
-  onActiveScheduleIdChange,
+  activeSchedule,
+  onActiveScheduleChange,
   socialMessages,
   onSocialMessagesChange,
   isSocialRotatorActive,
@@ -218,7 +218,7 @@ export function ControlPanel({
 
   const handleRemoveSchedule = (id: string) => {
     onScheduleListChange(prev => prev.filter(item => item.id !== id))
-    if (activeScheduleId === id) onActiveScheduleIdChange(null)
+    if (activeSchedule?.id === id) onActiveScheduleChange(null)
   }
 
   const handleUpdateSchedule = (id: string, patch: Partial<ScheduleItem>) => {
@@ -481,7 +481,7 @@ export function ControlPanel({
                   {scheduleList.length > 0 ? (
                     <div className="space-y-2">
                       {scheduleList.map(item => {
-                        const isActive = activeScheduleId === item.id
+                        const isActive = activeSchedule?.id === item.id
                         return (
                           <div key={item.id} className={cn(
                             "flex items-center justify-between p-3 rounded-lg border gap-3 transition-colors",
@@ -496,7 +496,7 @@ export function ControlPanel({
                               variant={isActive ? 'default' : 'secondary'}
                               size="sm"
                               className="font-bold"
-                              onClick={() => onActiveScheduleIdChange(isActive ? null : item.id)}
+                              onClick={() => onActiveScheduleChange(isActive ? null : item)}
                             >
                               {isActive ? 'Kinn van' : 'Mutat'}
                             </Button>
