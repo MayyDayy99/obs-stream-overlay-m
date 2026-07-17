@@ -41,7 +41,7 @@ export function ControllerView() {
   const [activeLowerThird, setActiveLowerThird] = useSharedState<LowerThirdData | null>('obs-lower-third-active', null)
   
   const [scheduleList, setScheduleList] = useSharedState<ScheduleItem[]>('obs-schedule-list', [])
-  const [activeScheduleId, setActiveScheduleId] = useSharedState<string | null>('obs-schedule-active', null)
+  const [activeSchedule, setActiveSchedule] = useSharedState<ScheduleItem | null>('obs-schedule-active', null)
   
   const [socialMessages, setSocialMessages] = useSharedState<SocialMessage[]>('obs-social-msgs', [])
   const [isSocialRotatorActive, setIsSocialRotatorActive] = useSharedState<boolean>('obs-social-active', false)
@@ -206,8 +206,8 @@ export function ControllerView() {
           
           scheduleList={scheduleList}
           onScheduleListChange={setScheduleList}
-          activeScheduleId={activeScheduleId}
-          onActiveScheduleIdChange={setActiveScheduleId}
+          activeSchedule={activeSchedule}
+          onActiveScheduleChange={setActiveSchedule}
           
           socialMessages={socialMessages}
           onSocialMessagesChange={setSocialMessages}
